@@ -1,36 +1,128 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# FlowList
+
+A full-stack Todo app to create, organize, and complete tasks with a clean UI and a PostgreSQL-backed API.
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router)
+- **Language:** TypeScript
+- **UI:** React 19 + Tailwind CSS v4
+- **Database:** PostgreSQL (Neon)
+- **ORM:** Prisma
+- **HTTP Client:** Axios
+
+## Project Structure
+
+```text
+flowlist/
+├── app/
+│   ├── api/
+│   │   └── v1/
+│   │       └── signup/
+│   │           └── route.ts        # User signup API
+│   ├── lib/
+│   │   └── db/
+│   │       └── index.ts            # Prisma client singleton
+│   ├── signin/
+│   │   └── page.tsx                # Sign-in page
+│   ├── signup/
+│   │   └── page.tsx                # Sign-up page
+│   ├── globals.css
+│   ├── layout.tsx
+│   └── page.tsx                    # Landing page
+├── prisma/
+│   ├── migrations/
+│   └── schema.prisma               # Prisma schema
+├── .env.example
+├── prisma.config.ts
+└── package.json
+```
+
+## Current Database Model
+
+```prisma
+model User {
+  id       Int    @id @default(autoincrement())
+  username String
+  password String
+}
+```
+
+## API Endpoints
+
+### Auth Routes (`/api/v1`)
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST | `/signup` | Register a new user | No |
+
+> Note: `/signin` and todo CRUD routes are planned next.
+
+## Todo Data Shape (Planned)
+
+FlowList todo items are intended to include:
+
+```json
+{
+  "id": "todo_01",
+  "title": "Finish Prisma setup",
+  "description": "Create schema, run migration, and generate client",
+  "completed": false,
+  "priority": "high",
+  "dueDate": "2026-04-09T12:00:00.000Z",
+  "createdAt": "2026-04-07T05:30:00.000Z"
+}
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 20+
+- pnpm
+- PostgreSQL database (Neon/local)
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Set `DATABASE_URL` in `.env`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Prisma Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+pnpm prisma generate
+pnpm prisma migrate dev --name init_schema
+```
 
-## Learn More
+### Run the App
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open `http://localhost:3000`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Scripts
 
-## Deploy on Vercel
+- `pnpm dev` - start development server
+- `pnpm build` - create production build
+- `pnpm start` - run production server
+- `pnpm lint` - run ESLint
+- `pnpm prisma generate` - generate Prisma client
+- `pnpm prisma migrate dev` - run development migrations
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Environment Variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Use `.env.example` as a template:
+
+```env
+DATABASE_URL="postgresql://username:password@host:5432/database?sslmode=require"
+```
+
+## License
+
+ISC
