@@ -20,12 +20,11 @@ flowlist/
 │   ├── api/
 │   │   ├── auth/
 │   │   │   └── [...nextauth]/route.ts  # NextAuth handler
-│   │   └── v1/
-│   │       ├── signup/
-│   │       │   └── route.ts        # User signup API
-│   │       └── todos/
-│   │           ├── route.ts        # List/create todos
-│   │           └── [todoId]/route.ts # Get/update/delete one todo
+│   │   ├── signup/
+│   │   │   └── route.ts            # User signup API
+│   │   └── todos/
+│   │       ├── route.ts            # List/create todos
+│   │       └── [todoId]/route.ts   # Get/update/delete one todo
 │   ├── lib/
 │   │   ├── auth/
 │   │   │   ├── options.ts          # NextAuth providers + config
@@ -74,22 +73,22 @@ model Todo {
 
 ## API Endpoints
 
-### Auth Routes (`/api/v1`)
+### App API Routes (`/api`)
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/signup` | Register a new user | No |
-| GET | `/todos` | List signed-in user's todos | Yes |
-| POST | `/todos` | Create a todo for signed-in user | Yes |
-| GET | `/todos/:todoId` | Get one todo by id | Yes |
-| PATCH | `/todos/:todoId` | Update title/description/completed | Yes |
-| DELETE | `/todos/:todoId` | Delete a todo by id | Yes |
+| POST | `/api/signup` | Register a new user | No |
+| GET | `/api/todos` | List signed-in user's todos | Yes |
+| POST | `/api/todos` | Create a todo for signed-in user | Yes |
+| GET | `/api/todos/:todoId` | Get one todo by id | Yes |
+| PATCH | `/api/todos/:todoId` | Update title/description/completed | Yes |
+| DELETE | `/api/todos/:todoId` | Delete a todo by id | Yes |
 
 ### NextAuth Routes (`/api/auth`)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET/POST | `/[...nextauth]` | Sign in/out/session/callbacks (credentials) |
+| GET/POST | `/api/auth/[...nextauth]` | Sign in/out/session/callbacks (credentials) |
 
 ## Todo Frontend
 
