@@ -1,29 +1,30 @@
 import type { Metadata } from "next";
 import { Sora } from "next/font/google";
 import "./globals.css";
+import Providers from "@/app/providers";
 
 const sora = Sora({
-  subsets: ["latin"],
+    subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "FlowList",
-  description: "A focused todo app for planning your day with clarity.",
+    title: "FlowList",
+    description: "A focused todo app for planning your day with clarity.",
 };
 
 export default function RootLayout({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) {
-  return (
-    <html
-      lang="en"
-      className="h-full antialiased"
-    >
-      <body className={`${sora.className} min-h-full flex flex-col`}>
-        {children}
-      </body>
-    </html>
-  );
+    return (
+        <html
+            lang="en"
+            className="h-full antialiased"
+        >
+            <body className={`${sora.className} min-h-full flex flex-col`}>
+                <Providers>{children}</Providers>
+            </body>
+        </html>
+    );
 }

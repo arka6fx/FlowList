@@ -1,8 +1,27 @@
 import Link from "next/link";
 
-export default function Home() {
+import TodoBoard from "@/app/components/todo-board";
+import prisma from "@/app/lib/db";
+import { getCurrentUser } from "@/app/lib/auth/current-user";
+
+export default async function Home() {
+  const user = await getCurrentUser();
+
+  if (user) {
+    const todos = await prisma.todo.findMany({
+      where: {
+        userId: user.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return <TodoBoard initialTodos={todos.map((todo) => ({ ...todo, createdAt: todo.createdAt.toISOString(), updatedAt: todo.updatedAt.toISOString() }))} username={user.username} />;
+  }
+
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f7f4ea] bg-[linear-gradient(rgba(15,23,42,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.08)_1px,transparent_1px)] bg-size-[28px_28px] px-5 py-14 sm:px-8">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f7f4ea] bg-[linear-gradient(rgba(15,23,42,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.08)_1px,transparent_1px)] bg-size-[28px_28px] px-5 py-14 selection:bg-[#efb76880] selection:text-[#1e293b] sm:px-8">
       <div className="pointer-events-none absolute -left-24 top-16 h-56 w-56 rounded-full bg-[#f9b36f]/45 blur-3xl" />
       <div className="pointer-events-none absolute -right-20 bottom-20 h-60 w-60 rounded-full bg-[#ff8a70]/40 blur-3xl" />
 
@@ -13,7 +32,19 @@ export default function Home() {
               Focus better
             </p>
             <h1 className="text-4xl font-semibold leading-tight text-[#1e293b] sm:text-5xl">
-              Capture tasks quickly, finish your day calmly.
+              Capture{" "}
+              <span
+                className="inline-block px-2 pb-0.5 pt-1 text-[#b75a16]"
+                style={{
+                  backgroundImage:
+                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 100' preserveAspectRatio='none'%3E%3Cpath d='M1 16 Q24 6 50 13 Q74 5 101 12 Q132 3 161 11 Q182 7 199 4 L199 86 Q181 97 157 91 Q132 99 103 92 Q73 99 46 92 Q20 100 1 94 Z' fill='rgba(244,186,96,0.24)'/%3E%3C/svg%3E\")",
+                  backgroundSize: "100% 100%",
+                  backgroundRepeat: "no-repeat",
+                }}
+              >
+                tasks quickly
+              </span>
+              , finish your day calmly.
             </h1>
             <p className="text-base leading-relaxed text-[#334155] sm:text-lg">
               FlowList keeps your to-dos clean and intentional with priorities,
