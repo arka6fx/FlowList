@@ -28,8 +28,7 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
     const openTodos = useMemo(() => todos.filter((todo) => !todo.completed).length, [todos]);
     const completedTodos = todos.length - openTodos;
 
-    const createTodo = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
+    const createTodo = async () => {
         setError("");
 
         if (!title.trim()) {
@@ -40,7 +39,7 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
         setIsSaving(true);
 
         try {
-            const { data: payload } = await axios.post<{ todo: TodoItem }>("/api/v1/todos", {
+            const { data: payload } = await axios.post<{ todo: TodoItem }>("/api/todos", {
                 title,
                 description,
             });
@@ -57,7 +56,7 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
 
     const toggleTodo = async (todo: TodoItem) => {
         try {
-            const { data: payload } = await axios.patch<{ todo: TodoItem }>(`/api/v1/todos/${todo.id}`, {
+            const { data: payload } = await axios.patch<{ todo: TodoItem }>(`/api/todos/${todo.id}`, {
                 completed: !todo.completed,
             });
 
@@ -69,7 +68,7 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
 
     const updateTodo = async (todo: TodoItem, fields: { title: string; description: string | null }) => {
         try {
-            const { data: payload } = await axios.patch<{ todo: TodoItem }>(`/api/v1/todos/${todo.id}`, fields);
+            const { data: payload } = await axios.patch<{ todo: TodoItem }>(`/api/todos/${todo.id}`, fields);
             setTodos((current) => current.map((item) => (item.id === todo.id ? payload.todo : item)));
         } catch {
             setError("Could not save todo updates.");
@@ -78,7 +77,7 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
 
     const deleteTodo = async (todoId: number) => {
         try {
-            await axios.delete(`/api/v1/todos/${todoId}`);
+            await axios.delete(`/api/todos/${todoId}`);
             setTodos((current) => current.filter((todo) => todo.id !== todoId));
         } catch {
             setError("Could not delete todo.");
@@ -110,7 +109,13 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
                     </button>
                 </div>
 
-                <form onSubmit={createTodo} className="grid gap-3 rounded-2xl border border-[#8f4a1f29] bg-white/90 p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-center">
+                <form
+                    onSubmit={(event) => {
+                        event.preventDefault();
+                        void createTodo();
+                    }}
+                    className="grid gap-3 rounded-2xl border border-[#8f4a1f29] bg-white/90 p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-center"
+                >
                     <input
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}

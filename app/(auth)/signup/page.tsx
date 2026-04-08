@@ -21,7 +21,7 @@ export default function SignUp() {
         const password = passwordRef.current?.value ?? "";
 
         try {
-            await axios.post("/api/v1/signup", {
+            await axios.post("/api/signup", {
                 username,
                 email,
                 password,
