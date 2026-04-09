@@ -21,24 +21,28 @@ flowlist/
 │   │   ├── auth/
 │   │   │   └── [...nextauth]/route.ts  # NextAuth handler
 │   │   └── todos/
-│   │       ├── route.ts            # List/create todos
-│   │       └── [todoId]/route.ts   # Get/update/delete one todo
+│   │       ├── route.ts                # List/create todos
+│   │       └── [todoId]/route.ts      # Get/update/delete one todo
+│   ├── components/
+│   │   ├── theme-toggle.tsx           # Dark mode toggle
+│   │   ├── todo-board.tsx             # Todo board component
+│   │   └── todo-board-shell.tsx        # Todo board wrapper with auth
 │   ├── lib/
 │   │   ├── auth/
-│   │   │   └── options.ts          # NextAuth providers + config
+│   │   │   ├── options.ts              # NextAuth providers + config
+│   │   │   └── current-user.ts        # Get current user helper
 │   │   └── db/
-│   │       └── index.ts            # Prisma client singleton
-│   ├── (auth)/signin/
-│   │   └── page.tsx                # Sign-in page
-│   ├── (auth)/signup/
-│   │   └── page.tsx                # Sign-up page
-│   ├── providers.tsx               # Session provider wrapper
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx                    # Landing page
+│   │       └── index.ts                # Prisma client singleton
+│   ├── (auth)/
+│   │   ├── layout.tsx                  # Auth pages layout
+│   │   ├── signin/page.tsx             # Sign-in page
+│   │   └── signup/page.tsx             # Sign-up page
+│   ├── providers.tsx                  # Session provider wrapper
+│   ├── layout.tsx                      # Root layout
+│   └── page.tsx                        # Landing page
 ├── prisma/
 │   ├── migrations/
-│   └── schema.prisma               # Prisma schema
+│   └── schema.prisma                   # Prisma schema
 ├── .env.example
 ├── prisma.config.ts
 └── package.json
@@ -64,6 +68,9 @@ model Todo {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   userId      Int
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 ```
 
@@ -73,17 +80,17 @@ model Todo {
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| GET | `/api/todos` | List signed-in user's todos | Yes |
-| POST | `/api/todos` | Create a todo for signed-in user | Yes |
-| GET | `/api/todos/:todoId` | Get one todo by id | Yes |
-| PATCH | `/api/todos/:todoId` | Update title/description/completed | Yes |
-| DELETE | `/api/todos/:todoId` | Delete a todo by id | Yes |
+| GET | `/api/todos` | List all todos for signed-in user | Yes |
+| POST | `/api/todos` | Create a new todo | Yes |
+| GET | `/api/todos/:todoId` | Get one todo by ID | Yes |
+| PATCH | `/api/todos/:todoId` | Update todo (title, description, completed) | Yes |
+| DELETE | `/api/todos/:todoId` | Delete a todo by ID | Yes |
 
 ### NextAuth Routes (`/api/auth`)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET/POST | `/api/auth/[...nextauth]` | Sign in/out/session/callbacks (Google OAuth) |
+| GET/POST | `/api/auth/[...nextauth]` | Google OAuth handler (signin, signout, session, callback) |
 
 ## Todo Frontend
 
@@ -136,16 +143,14 @@ Open `http://localhost:3000`.
 - `pnpm build` - create production build
 - `pnpm start` - run production server
 - `pnpm lint` - run ESLint
-- `pnpm prisma generate` - generate Prisma client
-- `pnpm prisma migrate dev` - run development migrations
 
 ## Environment Variables
 
-Use `.env.example` as a template:
+Required for both local development and production:
 
 ```env
 DATABASE_URL="postgresql://username:password@host:5432/database?sslmode=require"
-NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_URL="http://localhost:3000"  # Use production URL in production
 NEXTAUTH_SECRET="replace-with-a-long-random-string"
 GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
