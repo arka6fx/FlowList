@@ -1,1 +1,45 @@
 @import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+.stat-card-glow {
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card-glow::after {
+    content: "";
+    position: absolute;
+    inset: -30% auto auto -35%;
+    width: 42%;
+    height: 140%;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(191, 219, 254, 0.25), rgba(255, 255, 255, 0));
+    transform: rotate(10deg);
+    animation: stat-sheen 5.8s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.dark .stat-card-glow::after {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(56, 189, 248, 0.2), rgba(255, 255, 255, 0));
+}
+
+@keyframes stat-sheen {
+    0% {
+        transform: translateX(-180%) rotate(10deg);
+        opacity: 0;
+    }
+
+    25% {
+        opacity: 0.9;
+    }
+
+    45% {
+        transform: translateX(380%) rotate(10deg);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(380%) rotate(10deg);
+        opacity: 0;
+    }
+}

@@ -1,8 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import { signOut } from "next-auth/react";
 import axios from "axios";
+
+const ThemeToggle = dynamic(() => import("@/app/components/theme-toggle"), {
+    ssr: false,
+});
 
 type TodoItem = {
     id: number;
@@ -24,15 +29,62 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
     const [description, setDescription] = useState("");
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState("");
+    const [isClient, setIsClient] = useState(false);
+    const [isNavCompact, setIsNavCompact] = useState(false);
+    const [navOffsetY, setNavOffsetY] = useState(0);
+    const lastScrollYRef = useRef(0);
 
-    const openTodos = useMemo(() => todos.filter((todo) => !todo.completed).length, [todos]);
-    const completedTodos = todos.length - openTodos;
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isClient) {
+            return;
+        }
+
+        const scrollContainer = document.getElementById("dashboard-scroll-container");
+
+        if (!scrollContainer) {
+            return;
+        }
+
+        const onScroll = () => {
+            const currentY = scrollContainer.scrollTop;
+            const isScrollingDown = currentY > lastScrollYRef.current;
+
+            if (currentY < 24) {
+                setIsNavCompact(false);
+            } else if (isScrollingDown && currentY > 56) {
+                setIsNavCompact(true);
+            } else if (!isScrollingDown) {
+                setIsNavCompact(false);
+            }
+
+            setNavOffsetY(Math.min(currentY * 0.16, 14));
+
+            lastScrollYRef.current = currentY;
+        };
+
+        onScroll();
+
+        scrollContainer.addEventListener("scroll", onScroll, { passive: true });
+        return () => {
+            scrollContainer.removeEventListener("scroll", onScroll);
+        };
+    }, [isClient]);
+
+    const navCompact = isClient && isNavCompact;
+
+    const openTodos = useMemo(() => todos.filter((todo) => !todo.completed), [todos]);
+    const completedTodos = useMemo(() => todos.filter((todo) => todo.completed), [todos]);
+    const completionRate = todos.length === 0 ? 0 : Math.round((completedTodos.length / todos.length) * 100);
 
     const createTodo = async () => {
         setError("");
 
         if (!title.trim()) {
-            setError("Please add a title.");
+            setError("Please add a task title.");
             return;
         }
 
@@ -85,28 +137,68 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
     };
 
     return (
-        <main className="relative flex min-h-screen justify-center overflow-hidden bg-[#f7f3ec] px-5 py-10 sm:px-8">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_18%,rgba(242,138,73,0.26),transparent_34%),radial-gradient(circle_at_82%_14%,rgba(255,189,122,0.22),transparent_30%),radial-gradient(circle_at_58%_92%,rgba(215,94,48,0.2),transparent_36%)]" />
+        <main id="dashboard-scroll-container" className="relative h-screen overflow-y-auto overflow-x-hidden bg-[#edf4ff] text-[#0f172a] dark:bg-[#090c14] dark:text-[#d5d9e7]">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_0%,rgba(59,130,246,0.2),transparent_34%),radial-gradient(circle_at_82%_4%,rgba(14,165,233,0.16),transparent_28%),linear-gradient(180deg,#edf4ff_12%,#e3edff_100%)] dark:bg-[radial-gradient(circle_at_18%_0%,rgba(36,135,255,0.22),transparent_34%),radial-gradient(circle_at_82%_4%,rgba(10,180,255,0.16),transparent_28%),linear-gradient(180deg,#090c14_12%,#060912_100%)]" />
+            <div className="pointer-events-none absolute inset-y-0 left-0 w-32 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.22),transparent_68%)] blur-xl dark:bg-[radial-gradient(circle_at_center,rgba(10,132,255,0.16),transparent_68%)]" />
+            <div className="pointer-events-none absolute inset-y-0 right-0 w-32 bg-[radial-gradient(circle_at_center,rgba(14,165,233,0.22),transparent_68%)] blur-xl dark:bg-[radial-gradient(circle_at_center,rgba(10,132,255,0.16),transparent_68%)]" />
 
-            <section className="relative z-10 w-full max-w-5xl rounded-[30px] border border-[#8f4a1f2b] bg-[linear-gradient(165deg,rgba(255,255,255,0.84),rgba(255,247,232,0.94))] p-6 shadow-[0_24px_56px_rgba(124,59,24,0.16)] backdrop-blur sm:p-8">
-                <div className="mb-7 flex flex-wrap items-center justify-between gap-4">
-                    <div>
-                        <p className="text-xs uppercase tracking-[0.22em] text-[#92400e]">FlowList Dashboard</p>
-                        <h1 className="mt-1 text-3xl font-semibold text-[#1e293b]">Welcome, {username}</h1>
-                        <p className="mt-2 text-sm text-[#475569]">Plan faster and clear tasks with intention.</p>
-                        <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
-                            <span className="rounded-full border border-[#f0b06f] bg-[#ffe9cf] px-3 py-1 text-[#9a4b13]">Open {openTodos}</span>
-                            <span className="rounded-full border border-[#89d5b4] bg-[#e8fff4] px-3 py-1 text-[#136143]">Done {completedTodos}</span>
-                        </div>
+            <header
+                style={{ transform: `translateY(${navOffsetY}px)` }}
+                className={`fixed inset-x-0 top-0 z-40 border-b border-[#9bb9ea] bg-[#f4f8ffde] backdrop-blur-xl transition-all duration-300 ease-out dark:border-[#1f2f4e] dark:bg-[#080e1b]/88 ${
+                    navCompact ? "py-0" : "py-1"
+                }`}
+            >
+                <div
+                    className={`mx-auto flex w-full max-w-[1600px] items-center justify-between px-4 transition-all duration-300 ease-out sm:px-6 lg:px-8 ${
+                        navCompact ? "h-11 scale-[0.985]" : "h-14"
+                    }`}
+                >
+                    <div className="flex items-center gap-3">
+                        <span
+                            className={`inline-flex items-center justify-center rounded-lg bg-gradient-to-br from-[#17b5ff] to-[#2f6df8] text-white shadow-[0_8px_18px_rgba(37,99,235,0.35)] transition-all duration-300 ${
+                                navCompact ? "h-6 w-6" : "h-7 w-7"
+                            }`}
+                        >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" className={`${navCompact ? "h-3.5 w-3.5" : "h-4 w-4"} fill-current`}>
+                                <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
+                            </svg>
+                        </span>
+                        <p
+                            className={`font-semibold text-[#1e3a8a] transition-all duration-300 dark:text-[#edf3ff] ${
+                                navCompact ? "text-[13px]" : "text-sm"
+                            }`}
+                        >
+                            FlowList
+                        </p>
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={() => void signOut({ callbackUrl: "/signin" })}
-                        className="rounded-xl border border-[#8f4a1f4a] bg-white/80 px-4 py-2 text-sm font-semibold text-[#1f2937] transition hover:-translate-y-0.5 hover:bg-[#fff5e5]"
-                    >
-                        Sign out
-                    </button>
+                    <div className="flex items-center gap-3">
+                        <ThemeToggle className="hidden sm:inline-flex" />
+
+                        <div className="hidden rounded-md border border-[#7ea3df] bg-[#e8f0ff] px-3 py-1.5 text-xs font-semibold text-[#1e3a8a] dark:border-[#304b7e] dark:bg-[#13213a] dark:text-[#e2ebff] sm:inline-flex">
+                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#2563eb] text-[10px] font-bold text-white dark:bg-[#3349ff]">
+                                {username.slice(0, 1).toUpperCase()}
+                            </span>
+                            <span className="ml-2">{username}</span>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => void signOut({ callbackUrl: "/signin" })}
+                            className="rounded-md border border-[#7ea3df] bg-[#e8f0ff] px-3 py-1.5 text-xs font-semibold text-[#1e3a8a] transition hover:border-[#5f8ad3] hover:bg-[#dce8ff] dark:border-[#304b7e] dark:bg-[#13213a] dark:text-[#e2ebff] dark:hover:border-[#4f74bb] dark:hover:bg-[#1a2c4d]"
+                        >
+                            Sign out
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <section className="relative z-10 mx-auto w-full max-w-6xl px-4 pb-10 pt-20 sm:px-6 lg:px-8">
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <StatCard label="Total tasks" value={todos.length} accent="from-[#f59e0b]/25 to-[#f97316]/10" />
+                    <StatCard label="Open" value={openTodos.length} accent="from-[#3b82f6]/25 to-[#2563eb]/10" />
+                    <StatCard label="Completed" value={completedTodos.length} accent="from-[#10b981]/25 to-[#059669]/10" />
+                    <StatCard label="Completion" value={`${completionRate}%`} accent="from-[#22d3ee]/25 to-[#0ea5e9]/10" />
                 </div>
 
                 <form
@@ -114,50 +206,89 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
                         event.preventDefault();
                         void createTodo();
                     }}
-                    className="grid gap-3 rounded-2xl border border-[#8f4a1f29] bg-white/90 p-4 sm:grid-cols-[1fr_1fr_auto] sm:items-center"
+                    className="mt-5 grid gap-3 rounded-2xl border border-[#bcd0f5] bg-[#f6faff]/90 p-4 transition hover:border-[#7ea7ea] hover:shadow-[0_14px_30px_rgba(37,99,235,0.16)] dark:border-[#2a3650] dark:bg-[#0c121f]/90 dark:hover:border-[#375894] lg:grid-cols-[1fr_1fr_auto]"
                 >
                     <input
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
                         placeholder="Task title"
-                        className="rounded-xl border border-[#c87b4e55] px-4 py-3 text-sm text-[#1f2937] outline-none transition focus:border-[#df6b3f] focus:ring-2 focus:ring-[#f7bc7b]"
+                        className="rounded-xl border border-[#b7caf0] bg-[#ffffff] px-4 py-3 text-sm text-[#0f172a] outline-none transition placeholder:text-[#64748b] focus:border-[#2563eb] dark:border-[#2d3d60] dark:bg-[#0f1628] dark:text-[#edf2ff] dark:placeholder:text-[#687491] dark:focus:border-[#339dff]"
                     />
                     <input
                         value={description}
                         onChange={(event) => setDescription(event.target.value)}
                         placeholder="Description (optional)"
-                        className="rounded-xl border border-[#c87b4e55] px-4 py-3 text-sm text-[#1f2937] outline-none transition focus:border-[#df6b3f] focus:ring-2 focus:ring-[#f7bc7b]"
+                        className="rounded-xl border border-[#b7caf0] bg-[#ffffff] px-4 py-3 text-sm text-[#0f172a] outline-none transition placeholder:text-[#64748b] focus:border-[#2563eb] dark:border-[#2d3d60] dark:bg-[#0f1628] dark:text-[#edf2ff] dark:placeholder:text-[#687491] dark:focus:border-[#339dff]"
                     />
                     <button
                         type="submit"
                         disabled={isSaving}
-                        className="rounded-xl bg-[linear-gradient(120deg,#e4572e,#ca3f21)] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(196,72,32,0.34)] transition hover:-translate-y-0.5 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-xl bg-gradient-to-r from-[#2563eb] to-[#1d4ed8] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(37,99,235,0.4)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                        {isSaving ? "Saving..." : "Add"}
+                        {isSaving ? "Saving..." : "Add task"}
                     </button>
                 </form>
 
-                {error ? <p className="mt-3 text-sm text-[#c2410c]">{error}</p> : null}
+                {error ? <p className="mt-3 text-sm text-[#dc2626] dark:text-[#ff8a7a]">{error}</p> : null}
 
-                <ul className="mt-6 space-y-3">
-                    {todos.map((todo) => (
-                        <TodoRow
-                            key={todo.id}
-                            todo={todo}
-                            onToggle={toggleTodo}
-                            onDelete={deleteTodo}
-                            onSave={updateTodo}
-                        />
-                    ))}
-                </ul>
-
-                {todos.length === 0 ? (
-                    <div className="mt-8 rounded-2xl border border-dashed border-[#8f4a1f4f] bg-[#fff7eb] p-6 text-sm text-[#475569]">
-                        No todos yet. Add your first task above.
-                    </div>
-                ) : null}
+                <section className="mt-5 grid gap-4 xl:grid-cols-2">
+                    <TodoColumn
+                        title="Open tasks"
+                        todos={openTodos}
+                        emptyText="No open tasks. Great momentum."
+                        onToggle={toggleTodo}
+                        onDelete={deleteTodo}
+                        onSave={updateTodo}
+                    />
+                    <TodoColumn
+                        title="Completed"
+                        todos={completedTodos}
+                        emptyText="Nothing completed yet. Start with one task."
+                        onToggle={toggleTodo}
+                        onDelete={deleteTodo}
+                        onSave={updateTodo}
+                    />
+                </section>
             </section>
         </main>
+    );
+}
+
+function StatCard({ label, value, accent }: { label: string; value: string | number; accent: string }) {
+    return (
+        <article className={`stat-card-glow rounded-xl border border-[#a9c1ec] bg-gradient-to-br ${accent} p-[1px] transition hover:border-[#5f89d2] hover:shadow-[0_14px_30px_rgba(24,94,224,0.18)] dark:border-[#24314b] dark:hover:border-[#3e5f9d]`}>
+            <div className="rounded-[11px] bg-[#f5f9ff] px-4 py-3 dark:bg-[#0c121f]">
+                <p className="text-xs uppercase tracking-[0.14em] text-[#5b7ab4] dark:text-[#90a0c4]">{label}</p>
+                <p className="mt-1 text-3xl font-semibold text-[#0f172a] dark:text-[#ecf2ff]">{value}</p>
+            </div>
+        </article>
+    );
+}
+
+type TodoColumnProps = {
+    title: string;
+    todos: TodoItem[];
+    emptyText: string;
+    onToggle: (todo: TodoItem) => Promise<void>;
+    onDelete: (todoId: number) => Promise<void>;
+    onSave: (todo: TodoItem, fields: { title: string; description: string | null }) => Promise<void>;
+};
+
+function TodoColumn({ title, todos, emptyText, onToggle, onDelete, onSave }: TodoColumnProps) {
+    return (
+        <section className="rounded-2xl border border-[#b8cdf2] bg-[#f6faff]/92 transition hover:border-[#6f98dd] hover:shadow-[0_16px_34px_rgba(24,94,224,0.2)] dark:border-[#24314b] dark:bg-[#0b101b]/92 dark:hover:border-[#3a5b96]">
+            <header className="border-b border-[#c9d9f4] px-4 py-3 dark:border-[#1c2a45]">
+                <h3 className="font-semibold text-[#1e3a8a] dark:text-[#eef2ff]">{title}</h3>
+            </header>
+            <div className="max-h-[38rem] overflow-auto px-4 py-4">
+                {todos.length === 0 ? <p className="text-sm text-[#64748b] dark:text-[#7f8aa8]">{emptyText}</p> : null}
+                <ul className="space-y-3">
+                    {todos.map((todo) => (
+                        <TodoRow key={todo.id} todo={todo} onToggle={onToggle} onDelete={onDelete} onSave={onSave} />
+                    ))}
+                </ul>
+            </div>
+        </section>
     );
 }
 
@@ -187,13 +318,13 @@ function TodoRow({ todo, onToggle, onDelete, onSave }: TodoRowProps) {
     };
 
     return (
-        <li className="rounded-2xl border border-[#8f4a1f29] bg-white/95 p-4 shadow-[0_8px_20px_rgba(83,37,14,0.08)]">
+        <li className="rounded-xl border border-[#bfd2f2] bg-[#ffffff] p-3 transition hover:border-[#6f97dd] hover:shadow-[0_10px_22px_rgba(24,94,224,0.2)] dark:border-[#23314d] dark:bg-[#0e1525] dark:hover:border-[#3a5a93]">
             <div className="flex items-start justify-between gap-3">
                 <button
                     type="button"
                     onClick={() => void onToggle(todo)}
                     className={`mt-1 h-5 w-5 rounded-full border-2 transition ${
-                        todo.completed ? "border-[#10b981] bg-[#10b981]" : "border-[#cbd5e1] bg-white"
+                        todo.completed ? "border-[#34d399] bg-[#10b981]" : "border-[#7f95be] bg-transparent dark:border-[#4a5d83]"
                     }`}
                     aria-label="Toggle completed"
                 />
@@ -204,21 +335,21 @@ function TodoRow({ todo, onToggle, onDelete, onSave }: TodoRowProps) {
                             <input
                                 value={title}
                                 onChange={(event) => setTitle(event.target.value)}
-                                className="w-full rounded-lg border border-[#c87b4e55] px-3 py-2 text-sm"
+                                className="w-full rounded-lg border border-[#bfd1f2] bg-[#f7fbff] px-3 py-2 text-sm text-[#0f172a] dark:border-[#33486e] dark:bg-[#101a2c] dark:text-[#edf2ff]"
                             />
                             <textarea
                                 value={description}
                                 onChange={(event) => setDescription(event.target.value)}
                                 rows={2}
-                                className="w-full rounded-lg border border-[#c87b4e55] px-3 py-2 text-sm"
+                                className="w-full rounded-lg border border-[#bfd1f2] bg-[#f7fbff] px-3 py-2 text-sm text-[#0f172a] dark:border-[#33486e] dark:bg-[#101a2c] dark:text-[#edf2ff]"
                             />
                         </>
                     ) : (
                         <>
-                            <h3 className={`text-sm font-semibold ${todo.completed ? "text-[#94a3b8] line-through" : "text-[#1f2937]"}`}>
+                            <h4 className={`text-sm font-semibold ${todo.completed ? "text-[#8ca0c7] line-through dark:text-[#7e8db2]" : "text-[#0f172a] dark:text-[#e8eeff]"}`}>
                                 {todo.title}
-                            </h3>
-                            {todo.description ? <p className="text-sm text-[#64748b]">{todo.description}</p> : null}
+                            </h4>
+                            {todo.description ? <p className="text-sm text-[#64748b] dark:text-[#8d9bbb]">{todo.description}</p> : null}
                         </>
                     )}
                 </div>
@@ -228,7 +359,7 @@ function TodoRow({ todo, onToggle, onDelete, onSave }: TodoRowProps) {
                         <button
                             type="button"
                             onClick={() => void saveEdits()}
-                            className="rounded-lg bg-[linear-gradient(120deg,#e4572e,#ca3f21)] px-3 py-1.5 text-xs font-semibold text-white"
+                            className="rounded-md bg-gradient-to-r from-[#e4572e] to-[#ca3f21] px-3 py-1.5 text-xs font-semibold text-white"
                         >
                             Save
                         </button>
@@ -236,7 +367,7 @@ function TodoRow({ todo, onToggle, onDelete, onSave }: TodoRowProps) {
                         <button
                             type="button"
                             onClick={() => setIsEditing(true)}
-                            className="rounded-lg border border-[#0f172a2f] px-3 py-1.5 text-xs font-semibold text-[#334155]"
+                            className="rounded-md border border-[#7ea1dd] px-3 py-1.5 text-xs font-semibold text-[#1e3a8a] dark:border-[#3c4f74] dark:text-[#dbe5ff]"
                         >
                             Edit
                         </button>
@@ -245,7 +376,7 @@ function TodoRow({ todo, onToggle, onDelete, onSave }: TodoRowProps) {
                     <button
                         type="button"
                         onClick={() => void onDelete(todo.id)}
-                        className="rounded-lg border border-[#fecaca] bg-[#fff1f2] px-3 py-1.5 text-xs font-semibold text-[#b91c1c]"
+                        className="rounded-md border border-[#f5b7c3] bg-[#fff0f4] px-3 py-1.5 text-xs font-semibold text-[#be123c] dark:border-[#6a3140] dark:bg-[#2a1420] dark:text-[#ffa1b5]"
                     >
                         Delete
                     </button>

@@ -12,10 +12,9 @@ datasource db {
 }
 
 model User {
-    id        Int     @id @default(autoincrement())
-    username  String  @unique
-    email     String? @unique
-    password  String?
+    id        Int      @id @default(autoincrement())
+    username  String   @unique
+    email     String?  @unique
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
     todos     Todo[]

@@ -10,6 +10,29 @@ const sora = Sora({
 export const metadata: Metadata = {
     title: "FlowList",
     description: "A focused todo app for planning your day with clarity.",
+    metadataBase: new URL("https://flowlist.vercel.app"),
+    applicationName: "FlowList",
+    keywords: ["FlowList", "todo app", "task manager", "productivity", "next.js"],
+    manifest: "/manifest.json",
+    icons: {
+        icon: "/icon.svg",
+        apple: "/icon.svg",
+    },
+    openGraph: {
+        title: "FlowList",
+        description: "Plan tasks, track progress, and stay focused with FlowList.",
+        url: "https://flowlist.vercel.app",
+        siteName: "FlowList",
+        type: "website",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "FlowList",
+        description: "Plan tasks, track progress, and stay focused with FlowList.",
+    },
+    alternates: {
+        canonical: "/",
+    },
 };
 
 export default function RootLayout({
