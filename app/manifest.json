@@ -1,0 +1,11 @@
+{
+  "name": "FlowList",
+  "short_name": "FlowList",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

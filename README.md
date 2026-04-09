@@ -10,7 +10,7 @@ A full-stack Todo app to create, organize, and complete tasks with a clean UI an
 - **Database:** PostgreSQL (Neon)
 - **ORM:** Prisma
 - **HTTP Client:** Axios
-- **Authentication:** NextAuth (Credentials)
+- **Authentication:** NextAuth (Google OAuth)
 
 ## Project Structure
 
@@ -20,15 +20,12 @@ flowlist/
 │   ├── api/
 │   │   ├── auth/
 │   │   │   └── [...nextauth]/route.ts  # NextAuth handler
-│   │   ├── signup/
-│   │   │   └── route.ts            # User signup API
 │   │   └── todos/
 │   │       ├── route.ts            # List/create todos
 │   │       └── [todoId]/route.ts   # Get/update/delete one todo
 │   ├── lib/
 │   │   ├── auth/
-│   │   │   ├── options.ts          # NextAuth providers + config
-│   │   │   └── password.ts         # Password hash/verify helpers
+│   │   │   └── options.ts          # NextAuth providers + config
 │   │   └── db/
 │   │       └── index.ts            # Prisma client singleton
 │   ├── (auth)/signin/
@@ -54,7 +51,6 @@ model User {
   id        Int      @id @default(autoincrement())
   username  String   @unique
   email     String?  @unique
-  password  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   todos     Todo[]
@@ -77,7 +73,6 @@ model Todo {
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/api/signup` | Register a new user | No |
 | GET | `/api/todos` | List signed-in user's todos | Yes |
 | POST | `/api/todos` | Create a todo for signed-in user | Yes |
 | GET | `/api/todos/:todoId` | Get one todo by id | Yes |
@@ -88,7 +83,7 @@ model Todo {
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET/POST | `/api/auth/[...nextauth]` | Sign in/out/session/callbacks (credentials) |
+| GET/POST | `/api/auth/[...nextauth]` | Sign in/out/session/callbacks (Google OAuth) |
 
 ## Todo Frontend
 
@@ -117,12 +112,14 @@ Also set:
 
 - `NEXTAUTH_URL`
 - `NEXTAUTH_SECRET`
+- `GOOGLE_CLIENT_ID`
+- `GOOGLE_CLIENT_SECRET`
 
 ### Prisma Setup
 
 ```bash
 pnpm prisma generate
-pnpm prisma migrate dev --name add_todo_and_auth_fields
+pnpm prisma migrate dev
 ```
 
 ### Run the App
@@ -150,6 +147,8 @@ Use `.env.example` as a template:
 DATABASE_URL="postgresql://username:password@host:5432/database?sslmode=require"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="replace-with-a-long-random-string"
+GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
 ```
 
 ## License
