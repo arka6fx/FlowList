@@ -208,13 +208,23 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
                     }}
                     className="mt-5 grid gap-3 rounded-2xl border border-[#bcd0f5] bg-[#f6faff]/90 p-4 transition hover:border-[#7ea7ea] hover:shadow-[0_14px_30px_rgba(37,99,235,0.16)] dark:border-[#2a3650] dark:bg-[#0c121f]/90 dark:hover:border-[#375894] lg:grid-cols-[1fr_1fr_auto]"
                 >
+                    <label htmlFor="new-todo-title" className="sr-only">
+                        Task title
+                    </label>
                     <input
+                        id="new-todo-title"
+                        name="title"
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
                         placeholder="Task title"
                         className="rounded-xl border border-[#b7caf0] bg-[#ffffff] px-4 py-3 text-sm text-[#0f172a] outline-none transition placeholder:text-[#64748b] focus:border-[#2563eb] dark:border-[#2d3d60] dark:bg-[#0f1628] dark:text-[#edf2ff] dark:placeholder:text-[#687491] dark:focus:border-[#339dff]"
                     />
+                    <label htmlFor="new-todo-description" className="sr-only">
+                        Description (optional)
+                    </label>
                     <input
+                        id="new-todo-description"
+                        name="description"
                         value={description}
                         onChange={(event) => setDescription(event.target.value)}
                         placeholder="Description (optional)"
@@ -333,11 +343,13 @@ function TodoRow({ todo, onToggle, onDelete, onSave }: TodoRowProps) {
                     {isEditing ? (
                         <>
                             <input
+                                name="edit-title"
                                 value={title}
                                 onChange={(event) => setTitle(event.target.value)}
                                 className="w-full rounded-lg border border-[#bfd1f2] bg-[#f7fbff] px-3 py-2 text-sm text-[#0f172a] dark:border-[#33486e] dark:bg-[#101a2c] dark:text-[#edf2ff]"
                             />
                             <textarea
+                                name="edit-description"
                                 value={description}
                                 onChange={(event) => setDescription(event.target.value)}
                                 rows={2}
