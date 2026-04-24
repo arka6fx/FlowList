@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="FlowList">
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#17b5ff" />
-      <stop offset="100%" stop-color="#2f6df8" />
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#1d4ed8" />
     </linearGradient>
   </defs>
   <rect width="24" height="24" rx="6" fill="url(#bg)" />
