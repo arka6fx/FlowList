@@ -29,26 +29,26 @@ export default function SignIn() {
     };
 
     return (
-        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_22%_18%,#c7dcff_0,#d9e8ff_24%,#e8efff_52%,#eef3ff_100%)] px-5 py-10">
-            <div className="pointer-events-none absolute -top-16 left-0 h-72 w-72 rounded-full bg-[#5ea0ff]/30 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-20 right-0 h-80 w-80 rounded-full bg-[#8ad4ff]/35 blur-3xl" />
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#ebf2ff] bg-[linear-gradient(rgba(30,58,138,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(30,58,138,0.08)_1px,transparent_1px)] bg-size-[28px_28px] px-5 py-10 selection:bg-[#93c5fd80] selection:text-[#0f172a] dark:bg-[#070d19] dark:bg-[linear-gradient(rgba(56,189,248,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(56,189,248,0.08)_1px,transparent_1px)]">
+            <div className="pointer-events-none absolute -top-16 left-0 h-72 w-72 rounded-full bg-[#60a5fa]/40 blur-3xl dark:bg-[#1d4ed8]/45" />
+            <div className="pointer-events-none absolute -bottom-20 right-0 h-80 w-80 rounded-full bg-[#38bdf8]/30 blur-3xl dark:bg-[#0ea5e9]/35" />
 
-            <div className="relative w-full max-w-md rounded-[28px] border border-[#1d4ed81a] bg-[linear-gradient(160deg,rgba(255,255,255,0.9),rgba(239,246,255,0.96))] p-7 shadow-[0_24px_50px_rgba(30,64,175,0.16)] backdrop-blur sm:p-8">
+            <div className="relative w-full max-w-md rounded-[28px] border border-[#1e3a8a26] bg-[#f8fbff]/92 p-7 shadow-[0_24px_50px_rgba(30,64,175,0.16)] backdrop-blur dark:border-[#1e3a8a66] dark:bg-[#0b1324]/90 dark:shadow-[0_22px_54px_rgba(2,8,24,0.6)] sm:p-8">
                 <p className="mb-3 inline-flex rounded-full border border-[#93c5fd] bg-[#e0edff] px-3 py-1 font-mono text-xs uppercase tracking-[0.2em] text-[#1d4ed8]">
                     Welcome back
                 </p>
-                <h1 className="text-3xl font-semibold text-[#1e293b]">Sign in to FlowList</h1>
-                <p className="mt-2 text-sm text-[#475569]">Continue with Google to access your tasks.</p>
+                <h1 className="text-3xl font-semibold text-[#1e293b] dark:text-white">Sign in to FlowList</h1>
+                <p className="mt-2 text-sm text-[#475569] dark:text-white/60">Continue with Google to access your tasks.</p>
 
-                <ul className="mt-4 space-y-2 text-sm text-[#475569]">
+                <ul className="mt-4 space-y-2 text-sm text-[#475569] dark:text-white/60">
                     <li className="flex items-center gap-2">
-                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#dbeafe] text-xs font-bold text-[#1d4ed8]">
+                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#dbeafe] text-xs font-bold text-[#1d4ed8] dark:bg-blue-500/20 dark:text-blue-400">
                             ✓
                         </span>
                         Secure sign in with your Google account
                     </li>
                     <li className="flex items-center gap-2">
-                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#dbeafe] text-xs font-bold text-[#1d4ed8]">
+                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#dbeafe] text-xs font-bold text-[#1d4ed8] dark:bg-blue-500/20 dark:text-blue-400">
                             ✓
                         </span>
                         Instantly continue your existing todo board
@@ -66,9 +66,9 @@ export default function SignIn() {
                     {isLoading ? "Connecting Google..." : "Continue with Google"}
                 </button>
 
-                <p className="mt-5 text-center text-sm text-[#475569]">
+                <p className="mt-5 text-center text-sm text-[#475569] dark:text-white/60">
                     New here?{" "}
-                    <Link href="/signup" className="font-semibold text-[#1d4ed8] hover:underline">
+                    <Link href="/signup" className="font-semibold text-[#1d4ed8] hover:underline dark:text-blue-400">
                         Create an account
                     </Link>
                 </p>

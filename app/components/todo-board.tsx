@@ -23,6 +23,36 @@ type TodoBoardProps = {
     username: string;
 };
 
+const playPopSound = (isUndo = false) => {
+    try {
+        const AudioContextClass = (window as any).AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContextClass) return;
+        
+        const context = new AudioContextClass();
+        const oscillator = context.createOscillator();
+        const gainNode = context.createGain();
+
+        // Soft triangle wave for pleasing tone
+        oscillator.type = "triangle";
+        
+        const startFreq = isUndo ? 440 : 880;
+        const endFreq = isUndo ? 220 : 440;
+
+        oscillator.frequency.setValueAtTime(startFreq, context.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(endFreq, context.currentTime + 0.12);
+
+        gainNode.gain.setValueAtTime(0, context.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.1, context.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.12);
+
+        oscillator.connect(gainNode);
+        gainNode.connect(context.destination);
+
+        oscillator.start();
+        oscillator.stop(context.currentTime + 0.12);
+    } catch (e) {}
+};
+
 export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
     const [todos, setTodos] = useState(initialTodos);
     const [title, setTitle] = useState("");
@@ -107,6 +137,9 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
     };
 
     const toggleTodo = async (todo: TodoItem) => {
+        // Play pleasing sound for both complete and undo
+        playPopSound(todo.completed);
+
         try {
             const { data: payload } = await axios.patch<{ todo: TodoItem }>(`/api/todos/${todo.id}`, {
                 completed: !todo.completed,
