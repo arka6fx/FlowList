@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 
 import { db } from "@/app/lib/db";
-import { authAccounts, authSessions, authUsers, authVerifications } from "@/app/lib/db/schema";
+import { authAccounts, authSessions, authUsers, authVerifications } from "@/drizzle/schema";
 
 const googleClientId = process.env.GOOGLE_CLIENT_ID;
 const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
