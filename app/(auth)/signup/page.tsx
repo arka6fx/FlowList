@@ -1,15 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Caveat } from "next/font/google";
 import { useEffect, useState } from "react";
 
 import { authClient } from "@/app/lib/auth/client";
-
-const caveat = Caveat({
-    subsets: ["latin"],
-    weight: ["600", "700"],
-});
+import { caveat } from "@/app/lib/fonts";
 
 export default function SignUp() {
     const [isMounted, setIsMounted] = useState(false);
