@@ -21,74 +21,114 @@ flowlist/
 │   │   ├── auth/
 │   │   │   └── [...all]/route.ts        # Better Auth handler
 │   │   └── todos/
-│   │       ├── route.ts                # List/create todos
-│   │       └── [todoId]/route.ts      # Get/update/delete one todo
+│   │       ├── route.ts                 # List/create todos
+│   │       └── [todoId]/route.ts        # Get/update/delete one todo
 │   ├── components/
-│   │   ├── theme-toggle.tsx           # Dark mode toggle
-│   │   ├── todo-board.tsx             # Todo board component
-│   │   └── todo-board-shell.tsx        # Todo board wrapper with auth
+│   │   ├── theme-toggle.tsx             # Dark mode toggle
+│   │   ├── todo-board.tsx               # Todo board component
+│   │   └── todo-board-shell.tsx         # Todo board wrapper with auth
 │   ├── lib/
 │   │   ├── auth/
-│   │   │   └── current-user.ts         # Get current app user helper
+│   │   │   ├── client.ts                # Better Auth client
+│   │   │   ├── current-user.ts           # Get current app user helper
+│   │   │   └── index.ts                  # Auth exports
 │   │   └── db/
-│   │       ├── index.ts                # Drizzle db singleton
-│   │       └── schema.ts               # Drizzle schema
+│   │       ├── index.ts                  # Drizzle db singleton
+│   │       └── schema.ts                # Drizzle schema
 │   ├── (auth)/
-│   │   ├── layout.tsx                  # Auth pages layout
-│   │   ├── signin/page.tsx             # Sign-in page
-│   │   └── signup/page.tsx             # Sign-up page
-│   ├── providers.tsx                  # Session provider wrapper
-│   ├── layout.tsx                      # Root layout
-│   └── page.tsx                        # Landing page
+│   │   ├── layout.tsx                    # Auth pages layout
+│   │   ├── signin/page.tsx              # Sign-in page
+│   │   └── signup/page.tsx              # Sign-up page
+│   ├── globals.css
+│   ├── layout.tsx                        # Root layout
+│   ├── page.tsx                         # Landing page
+│   ├── providers.tsx                     # Session provider
+│   └── manifest.json
 ├── drizzle/
-│   └── ...                             # Drizzle migrations/meta
+│   └── ...                              # Drizzle migrations/meta
 ├── drizzle.config.ts
 ├── .env.example
-└── package.json
+├── package.json
+└── public/
 ```
 
 ## Database Models
 
 ```ts
-import { boolean, foreignKey, index, integer, pgTable, serial, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { boolean, foreignKey, index, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 
-export const users = pgTable(
-  "User",
-  {
-    id: serial("id").primaryKey(),
-    username: text("username").notNull(),
-    email: text("email"),
-    createdAt: timestamp("createdAt", { withTimezone: false, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updatedAt", { withTimezone: false, precision: 3 }).notNull(),
-  },
-  (table) => [
-    uniqueIndex("User_username_key").on(table.username),
-    uniqueIndex("User_email_key").on(table.email),
-  ],
-);
+export const authUsers = pgTable("user", {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull().unique(),
+    emailVerified: boolean("email_verified").notNull().default(false),
+    image: text("image"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
+});
 
 export const todos = pgTable(
-  "Todo",
-  {
-    id: serial("id").primaryKey(),
-    title: text("title").notNull(),
-    description: text("description"),
-    completed: boolean("completed").notNull().default(false),
-    createdAt: timestamp("createdAt", { withTimezone: false, precision: 3 }).notNull().defaultNow(),
-    updatedAt: timestamp("updatedAt", { withTimezone: false, precision: 3 }).notNull(),
-    userId: integer("userId").notNull(),
-  },
-  (table) => [
-    index("Todo_userId_idx").on(table.userId),
-    foreignKey({
-      columns: [table.userId],
-      foreignColumns: [users.id],
-      name: "Todo_userId_fkey",
-    })
-      .onDelete("cascade")
-      .onUpdate("cascade"),
-  ],
+    "Todo",
+    {
+        id: serial("id").primaryKey(),
+        title: text("title").notNull(),
+        description: text("description"),
+        completed: boolean("completed").notNull().default(false),
+        createdAt: timestamp("createdAt", { withTimezone: false, precision: 3 }).notNull().defaultNow(),
+        updatedAt: timestamp("updatedAt", { withTimezone: false, precision: 3 }).notNull(),
+        userId: text("userId").notNull(),
+    },
+    (table) => [
+        index("Todo_userId_idx").on(table.userId),
+        foreignKey({
+            columns: [table.userId],
+            foreignColumns: [authUsers.id],
+            name: "Todo_userId_fkey",
+        })
+            .onDelete("cascade")
+            .onUpdate("cascade"),
+    ],
 );
+
+export const authSessions = pgTable("session", {
+    id: text("id").primaryKey(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    token: text("token").notNull().unique(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    userId: text("user_id")
+        .notNull()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+});
+
+export const authAccounts = pgTable("account", {
+    id: text("id").primaryKey(),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    userId: text("user_id")
+        .notNull()
+        .references(() => authUsers.id, { onDelete: "cascade" }),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true, mode: "date" }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true, mode: "date" }),
+    scope: text("scope"),
+    password: text("password"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
+});
+
+export const authVerifications = pgTable("verification", {
+    id: text("id").primaryKey(),
+    identifier: text("identifier").notNull(),
+    value: text("value").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }),
+});
 ```
 
 ## API Endpoints
