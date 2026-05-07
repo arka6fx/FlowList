@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 
 import { auth } from "@/app/lib/auth";
 import { db } from "@/app/lib/db";
-import { authUsers } from "@/app/lib/db/schema";
+import { authUsers } from "@/drizzle/schema";
 
 export const getCurrentUser = async () => {
     const session = await auth.api.getSession({
