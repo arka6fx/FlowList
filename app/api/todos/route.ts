@@ -2,27 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 
 import { db } from "@/app/lib/db";
-import { getCurrentUser } from "@/app/lib/auth/current-user";
-import { todos } from "@/app/lib/db/schema";
+import { requireAuth, parseId } from "@/app/lib/auth/utils";
+import { todos } from "@/drizzle/schema";
 
 export async function GET() {
-    const user = await getCurrentUser();
+    const auth = await requireAuth();
+    if (auth instanceof NextResponse) return auth;
 
-    if (!user) {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
-    const userTodos = await db.select().from(todos).where(eq(todos.userId, user.id)).orderBy(desc(todos.createdAt));
+    const userTodos = await db.select().from(todos).where(eq(todos.userId, auth.id)).orderBy(desc(todos.createdAt));
 
     return NextResponse.json({ todos: userTodos });
 }
 
 export async function POST(req: NextRequest) {
-    const user = await getCurrentUser();
-
-    if (!user) {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAuth();
+    if (auth instanceof NextResponse) return auth;
 
     const body = await req.json();
     const title = body.title?.trim();
@@ -37,7 +31,7 @@ export async function POST(req: NextRequest) {
         .values({
             title,
             description,
-            userId: user.id,
+            userId: auth.id,
             updatedAt: new Date(),
         })
         .returning();
