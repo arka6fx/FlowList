@@ -2,28 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 
 import { db } from "@/app/lib/db";
-import { getCurrentUser } from "@/app/lib/auth/current-user";
-import { todos } from "@/app/lib/db/schema";
-
-const parseTodoId = (value: string) => {
-    const todoId = Number(value);
-
-    if (!Number.isInteger(todoId) || todoId <= 0) {
-        return null;
-    }
-
-    return todoId;
-};
+import { requireAuth, parseId } from "@/app/lib/auth/utils";
+import { todos } from "@/drizzle/schema";
 
 export async function GET(_: NextRequest, context: { params: Promise<{ todoId: string }> }) {
-    const user = await getCurrentUser();
-
-    if (!user) {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAuth();
+    if (auth instanceof NextResponse) return auth;
 
     const { todoId: rawTodoId } = await context.params;
-    const todoId = parseTodoId(rawTodoId);
+    const todoId = parseId(rawTodoId);
 
     if (!todoId) {
         return NextResponse.json({ message: "Invalid todo id" }, { status: 400 });
@@ -32,7 +19,7 @@ export async function GET(_: NextRequest, context: { params: Promise<{ todoId: s
     const [todo] = await db
         .select()
         .from(todos)
-        .where(and(eq(todos.id, todoId), eq(todos.userId, user.id)))
+        .where(and(eq(todos.id, todoId), eq(todos.userId, auth.id)))
         .limit(1);
 
     if (!todo) {
@@ -43,14 +30,11 @@ export async function GET(_: NextRequest, context: { params: Promise<{ todoId: s
 }
 
 export async function PATCH(req: NextRequest, context: { params: Promise<{ todoId: string }> }) {
-    const user = await getCurrentUser();
-
-    if (!user) {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAuth();
+    if (auth instanceof NextResponse) return auth;
 
     const { todoId: rawTodoId } = await context.params;
-    const todoId = parseTodoId(rawTodoId);
+    const todoId = parseId(rawTodoId);
 
     if (!todoId) {
         return NextResponse.json({ message: "Invalid todo id" }, { status: 400 });
@@ -59,7 +43,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ todoI
     const [existingTodo] = await db
         .select({ id: todos.id })
         .from(todos)
-        .where(and(eq(todos.id, todoId), eq(todos.userId, user.id)))
+        .where(and(eq(todos.id, todoId), eq(todos.userId, auth.id)))
         .limit(1);
 
     if (!existingTodo) {
@@ -91,14 +75,11 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ todoI
 }
 
 export async function DELETE(_: NextRequest, context: { params: Promise<{ todoId: string }> }) {
-    const user = await getCurrentUser();
-
-    if (!user) {
-        return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireAuth();
+    if (auth instanceof NextResponse) return auth;
 
     const { todoId: rawTodoId } = await context.params;
-    const todoId = parseTodoId(rawTodoId);
+    const todoId = parseId(rawTodoId);
 
     if (!todoId) {
         return NextResponse.json({ message: "Invalid todo id" }, { status: 400 });
@@ -107,7 +88,7 @@ export async function DELETE(_: NextRequest, context: { params: Promise<{ todoId
     const [existingTodo] = await db
         .select({ id: todos.id })
         .from(todos)
-        .where(and(eq(todos.id, todoId), eq(todos.userId, user.id)))
+        .where(and(eq(todos.id, todoId), eq(todos.userId, auth.id)))
         .limit(1);
 
     if (!existingTodo) {
