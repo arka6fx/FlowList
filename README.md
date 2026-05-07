@@ -11,6 +11,8 @@ A full-stack Todo app to create, organize, and complete tasks with a clean UI an
 - **ORM:** Drizzle ORM
 - **HTTP Client:** Axios
 - **Authentication:** Better Auth (Google OAuth)
+- **Fonts:** Caveat (handwriting), System fonts (UI)
+- **PWA:** Web App Manifest
 
 ## Project Structure
 
@@ -24,32 +26,33 @@ flowlist/
 │   │       ├── route.ts                 # List/create todos
 │   │       └── [todoId]/route.ts        # Get/update/delete one todo
 │   ├── components/
-│   │   ├── theme-toggle.tsx             # Dark mode toggle
 │   │   ├── todo-board.tsx               # Todo board component
 │   │   └── todo-board-shell.tsx         # Todo board wrapper with auth
 │   ├── lib/
 │   │   ├── auth/
 │   │   │   ├── client.ts                # Better Auth client
-│   │   │   ├── current-user.ts           # Get current app user helper
-│   │   │   └── index.ts                  # Auth exports
+│   │   │   ├── current-user.ts         # Get current app user helper
+│   │   │   └── index.ts                 # Auth exports
 │   │   └── db/
-│   │       ├── index.ts                  # Drizzle db singleton
-│   │       └── schema.ts                # Drizzle schema
+│   │       ├── index.ts                 # Drizzle db singleton
+│   │       └── schema.ts               # Drizzle schema
 │   ├── (auth)/
-│   │   ├── layout.tsx                    # Auth pages layout
-│   │   ├── signin/page.tsx              # Sign-in page
-│   │   └── signup/page.tsx              # Sign-up page
+│   │   ├── layout.tsx                   # Auth pages layout
+│   │   ├── signin/page.tsx             # Sign-in page
+│   │   └── signup/page.tsx             # Sign-up page
 │   ├── globals.css
-│   ├── layout.tsx                        # Root layout
-│   ├── page.tsx                         # Landing page
-│   ├── providers.tsx                     # Session provider
-│   └── manifest.json
+│   ├── icon.svg
+│   ├── layout.tsx                      # Root layout
+│   ├── manifest.json
+│   ├── page.tsx                       # Landing page
+│   └── providers.tsx                   # Session provider
 ├── drizzle/
-│   └── ...                              # Drizzle migrations/meta
+│   └── ...                            # Drizzle migrations/meta
 ├── drizzle.config.ts
 ├── .env.example
 ├── package.json
 └── public/
+    └── logo.jpg
 ```
 
 ## Database Models
@@ -154,6 +157,8 @@ export const authVerifications = pgTable("verification", {
 - Authenticated users are taken to the Todo board on `/`
 - Guests still see the landing page and can navigate to sign up/sign in
 - The board supports create, read, update, delete, and complete toggling
+- Cat sound feedback on task creation and completion
+- Toast notifications for user actions
 
 ## Getting Started
 
@@ -200,17 +205,27 @@ Open `http://localhost:3000`.
 - `pnpm build` - create production build
 - `pnpm start` - run production server
 - `pnpm lint` - run ESLint
+- `pnpm db:generate` - generate Drizzle migrations
+- `pnpm db:migrate` - run Drizzle migrations
+- `pnpm db:pull` - pull schema from database
 
 ## Environment Variables
 
 Required for both local development and production:
 
 ```env
-DATABASE_URL="postgresql://username:password@host:5432/database?sslmode=require"
+DATABASE_URL="postgresql://username:password@host:5432/database?sslmode=verify-full"
 BETTER_AUTH_URL="http://localhost:3000"  # Use production URL in production
 BETTER_AUTH_SECRET="replace-with-a-long-random-string"
 GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
 GOOGLE_CLIENT_SECRET="your-google-client-secret"
+```
+
+For client-side (public):
+
+```env
+NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3000"
+NEXT_PUBLIC_API_URL="http://localhost:3000"
 ```
 
 ## License
