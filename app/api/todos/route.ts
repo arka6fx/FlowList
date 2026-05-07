@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { desc, eq } from "drizzle-orm";
 
-import prisma from "@/app/lib/db";
+import { db } from "@/app/lib/db";
 import { getCurrentUser } from "@/app/lib/auth/current-user";
+import { todos } from "@/app/lib/db/schema";
 
 export async function GET() {
     const user = await getCurrentUser();
@@ -10,16 +12,9 @@ export async function GET() {
         return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    const todos = await prisma.todo.findMany({
-        where: {
-            userId: user.id,
-        },
-        orderBy: {
-            createdAt: "desc",
-        },
-    });
+    const userTodos = await db.select().from(todos).where(eq(todos.userId, user.id)).orderBy(desc(todos.createdAt));
 
-    return NextResponse.json({ todos });
+    return NextResponse.json({ todos: userTodos });
 }
 
 export async function POST(req: NextRequest) {
@@ -37,13 +32,15 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: "Title is required" }, { status: 400 });
     }
 
-    const todo = await prisma.todo.create({
-        data: {
+    const [todo] = await db
+        .insert(todos)
+        .values({
             title,
             description,
             userId: user.id,
-        },
-    });
+            updatedAt: new Date(),
+        })
+        .returning();
 
     return NextResponse.json({ todo }, { status: 201 });
 }

@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { and, eq } from "drizzle-orm";
 
-import prisma from "@/app/lib/db";
+import { db } from "@/app/lib/db";
 import { getCurrentUser } from "@/app/lib/auth/current-user";
+import { todos } from "@/app/lib/db/schema";
 
 const parseTodoId = (value: string) => {
     const todoId = Number(value);
@@ -27,12 +29,11 @@ export async function GET(_: NextRequest, context: { params: Promise<{ todoId: s
         return NextResponse.json({ message: "Invalid todo id" }, { status: 400 });
     }
 
-    const todo = await prisma.todo.findFirst({
-        where: {
-            id: todoId,
-            userId: user.id,
-        },
-    });
+    const [todo] = await db
+        .select()
+        .from(todos)
+        .where(and(eq(todos.id, todoId), eq(todos.userId, user.id)))
+        .limit(1);
 
     if (!todo) {
         return NextResponse.json({ message: "Todo not found" }, { status: 404 });
@@ -55,12 +56,11 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ todoI
         return NextResponse.json({ message: "Invalid todo id" }, { status: 400 });
     }
 
-    const existingTodo = await prisma.todo.findFirst({
-        where: {
-            id: todoId,
-            userId: user.id,
-        },
-    });
+    const [existingTodo] = await db
+        .select({ id: todos.id })
+        .from(todos)
+        .where(and(eq(todos.id, todoId), eq(todos.userId, user.id)))
+        .limit(1);
 
     if (!existingTodo) {
         return NextResponse.json({ message: "Todo not found" }, { status: 404 });
@@ -76,16 +76,16 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ todoI
         return NextResponse.json({ message: "Title cannot be empty" }, { status: 400 });
     }
 
-    const todo = await prisma.todo.update({
-        where: {
-            id: existingTodo.id,
-        },
-        data: {
+    const [todo] = await db
+        .update(todos)
+        .set({
             ...(title !== undefined ? { title } : {}),
             ...(description !== undefined ? { description } : {}),
             ...(completed !== undefined ? { completed } : {}),
-        },
-    });
+            updatedAt: new Date(),
+        })
+        .where(eq(todos.id, existingTodo.id))
+        .returning();
 
     return NextResponse.json({ todo });
 }
@@ -104,22 +104,17 @@ export async function DELETE(_: NextRequest, context: { params: Promise<{ todoId
         return NextResponse.json({ message: "Invalid todo id" }, { status: 400 });
     }
 
-    const existingTodo = await prisma.todo.findFirst({
-        where: {
-            id: todoId,
-            userId: user.id,
-        },
-    });
+    const [existingTodo] = await db
+        .select({ id: todos.id })
+        .from(todos)
+        .where(and(eq(todos.id, todoId), eq(todos.userId, user.id)))
+        .limit(1);
 
     if (!existingTodo) {
         return NextResponse.json({ message: "Todo not found" }, { status: 404 });
     }
 
-    await prisma.todo.delete({
-        where: {
-            id: existingTodo.id,
-        },
-    });
+    await db.delete(todos).where(eq(todos.id, existingTodo.id));
 
     return NextResponse.json({ message: "Todo deleted" });
 }
