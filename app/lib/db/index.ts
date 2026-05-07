@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 
-import * as schema from "@/app/lib/db/schema";
+import * as schema from "@/drizzle/schema";
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -11,14 +11,4 @@ if (!connectionString) {
 
 const pool = new Pool({ connectionString });
 
-const dbSingleton = () => {
-    return drizzle(pool, { schema });
-};
-
-declare global {
-    var db: undefined | ReturnType<typeof dbSingleton>;
-}
-
-export const db = globalThis.db ?? dbSingleton();
-
-if (process.env.NODE_ENV !== "production") globalThis.db = db;
+export const db = drizzle(pool, { schema });
