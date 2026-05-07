@@ -1,16 +1,11 @@
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
-import { Caveat } from "next/font/google";
 
 import { db } from "@/app/lib/db";
 import { getCurrentUser } from "@/app/lib/auth/current-user";
+import { caveat } from "@/app/lib/fonts";
 import TodoBoardShell from "@/app/components/todo-board-shell";
-import { todos } from "@/app/lib/db/schema";
-
-const caveat = Caveat({
-  subsets: ["latin"],
-  weight: ["600", "700"],
-});
+import { todos } from "@/drizzle/schema";
 
 export default async function Home() {
   const user = await getCurrentUser();

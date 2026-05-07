@@ -2,14 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
-import { Caveat } from "next/font/google";
 
 import { authClient } from "@/app/lib/auth/client";
-
-const caveat = Caveat({
-    subsets: ["latin"],
-    weight: ["600", "700"],
-});
+import { caveat } from "@/app/lib/fonts";
 
 type TodoItem = {
     id: number;
