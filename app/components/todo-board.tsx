@@ -2,8 +2,14 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
+import { Caveat } from "next/font/google";
 
 import { authClient } from "@/app/lib/auth/client";
+
+const caveat = Caveat({
+    subsets: ["latin"],
+    weight: ["600", "700"],
+});
 
 type TodoItem = {
     id: number;
@@ -91,10 +97,20 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
             const { data: payload } = await axios.post<{ todo: TodoItem }>("/api/todos", {
                 title,
                 description,
-            });
-            setTodos((current) => [payload.todo, ...current]);
-            setTitle("");
-            setDescription("");
+});
+        setTodos((current) => [payload.todo, ...current]);
+        playCatSound(false);
+        setToast("Task added");
+        setTitle("");
+        setDescription("");
+
+        if (toastTimerRef.current) {
+            clearTimeout(toastTimerRef.current);
+        }
+
+        toastTimerRef.current = setTimeout(() => {
+            setToast("");
+        }, 900);
         } catch {
             setError("Could not create todo. Try again.");
         } finally {
@@ -176,7 +192,7 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <p className="text-xs uppercase tracking-[0.16em] text-[#d28f99]">FlowList Activity</p>
-                            <h1 className="text-2xl font-semibold text-[#ffe4e8] sm:text-3xl">Hey, {username}</h1>
+                            <h1 className={`${caveat.className} text-2xl font-semibold text-[#ffe4e8] sm:text-3xl`}>Hey, {username}</h1>
                         </div>
                         <div className="flex items-center gap-2">
                             <button

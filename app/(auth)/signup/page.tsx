@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { Caveat } from "next/font/google";
 import { useEffect, useState } from "react";
 
 import { authClient } from "@/app/lib/auth/client";
+
+const caveat = Caveat({
+    subsets: ["latin"],
+    weight: ["600", "700"],
+});
 
 export default function SignUp() {
     const [isMounted, setIsMounted] = useState(false);
@@ -36,10 +42,10 @@ export default function SignUp() {
             <div className="pointer-events-none absolute -bottom-16 left-0 h-80 w-80 rounded-full bg-[#5b2a36]/30 blur-3xl" />
 
             <div className="relative w-full max-w-md rounded-[28px] border border-[#713743] bg-[#2b232a]/95 p-7 shadow-[0_24px_50px_rgba(12,8,10,0.5)] backdrop-blur sm:p-8">
-                <p className="mb-3 inline-flex rounded-full border border-[#8d4451] bg-[#6c3240] px-3 py-1 font-mono text-xs uppercase tracking-[0.2em] text-[#ffe4e8]">
+                <p className={`${caveat.className} mb-3 inline-flex rounded-full border border-[#8d4451] bg-[#6c3240] px-3 py-1 font-mono text-xs uppercase tracking-[0.2em] text-[#ffe4e8]`}>
                     Get started
                 </p>
-                <h1 className="text-3xl font-semibold text-[#ffe4e8]">Create your FlowList account</h1>
+                <h1 className={`${caveat.className} text-3xl font-semibold text-[#ffe4e8]`}>Create your FlowList account</h1>
                 <p className="mt-2 text-sm text-[#d8a9b2]">Use Google to create your account in one step.</p>
 
                 <ul className="mt-4 space-y-2 text-sm text-[#e6bcc4]">
@@ -75,8 +81,8 @@ export default function SignUp() {
                     </Link>
                 </p>
 
-                <p className="mt-2 text-center text-sm text-[#b98a94]">
-                    <Link href="/" className="font-medium text-[#ffd7dd] hover:underline">
+                <p className={`${caveat.className} mt-3 text-center text-xl text-[#ffd7dd] hover:underline`}>
+                    <Link href="/" className="transition hover:text-[#fff0f2]">
                         ← Go back to landing page
                     </Link>
                 </p>
