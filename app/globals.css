@@ -2,6 +2,36 @@
 
 @custom-variant dark (&:is(.dark *));
 
+body {
+    font-family: "SF Pro Text", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.toast-cat {
+    animation: toast-in 0.08s ease-out, toast-out 0.12s ease-in 0.72s forwards;
+}
+
+@keyframes toast-in {
+    0% {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.96);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes toast-out {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+}
+
 .stat-card-glow {
     position: relative;
     overflow: hidden;

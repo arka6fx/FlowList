@@ -1,11 +1,6 @@
 import type { Metadata } from "next";
-import { Sora } from "next/font/google";
 import "./globals.css";
 import Providers from "@/app/providers";
-
-const sora = Sora({
-    subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
     title: "FlowList",
@@ -45,7 +40,7 @@ export default function RootLayout({
             lang="en"
             className="h-full antialiased"
         >
-            <body className={`${sora.className} min-h-full flex flex-col`}>
+            <body className="min-h-full flex flex-col">
                 <Providers>{children}</Providers>
             </body>
         </html>

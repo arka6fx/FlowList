@@ -42,7 +42,7 @@ export default function ThemeToggle({ className = "" }: ThemeToggleProps) {
         <button
             type="button"
             onClick={toggleTheme}
-            className={`inline-flex items-center rounded-md border border-[#7ea3df] bg-[#e8f0ff] px-3 py-1.5 text-xs font-semibold text-[#1e3a8a] transition hover:border-[#5f8ad3] hover:bg-[#dce8ff] dark:border-[#304b7e] dark:bg-[#13213a] dark:text-[#e2ebff] dark:hover:border-[#4f74bb] dark:hover:bg-[#1a2c4d] ${className}`}
+            className={`inline-flex items-center rounded-md border border-[#f0a98a] bg-[#fff1e6] px-3 py-1.5 text-xs font-semibold text-[#9a3412] transition hover:border-[#ea8a61] hover:bg-[#ffe4cf] dark:border-[#7c2d12] dark:bg-[#2a1408] dark:text-[#ffedd5] dark:hover:border-[#9a3412] dark:hover:bg-[#3a1b0b] ${className}`}
             aria-label="Toggle theme"
         >
             {theme === "dark" ? (

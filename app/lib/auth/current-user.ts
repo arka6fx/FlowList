@@ -1,26 +1,26 @@
-import { getServerSession } from "next-auth";
+import { eq } from "drizzle-orm";
+import { headers } from "next/headers";
 
-import prisma from "@/app/lib/db";
-import { authOptions } from "@/app/lib/auth/options";
+import { auth } from "@/app/lib/auth";
+import { db } from "@/app/lib/db";
+import { authUsers } from "@/app/lib/db/schema";
 
 export const getCurrentUser = async () => {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.id) {
-        return null;
-    }
-
-    const userId = Number(session.user.id);
-
-    if (Number.isNaN(userId)) {
-        return null;
-    }
-
-    const user = await prisma.user.findUnique({
-        where: {
-            id: userId,
-        },
+    const session = await auth.api.getSession({
+        headers: await headers(),
     });
 
-    return user;
+    const userId = session?.user?.id;
+
+    if (!userId) {
+        return null;
+    }
+
+    const [user] = await db
+        .select({ id: authUsers.id, username: authUsers.name, email: authUsers.email })
+        .from(authUsers)
+        .where(eq(authUsers.id, userId))
+        .limit(1);
+
+    return user ?? null;
 };
