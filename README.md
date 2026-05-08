@@ -17,42 +17,52 @@ A full-stack Todo app to create, organize, and complete tasks with a clean UI an
 ## Project Structure
 
 ```text
-flowlist/
-├── app/
+FlowList/
+├── app/                               # Next.js App Router
 │   ├── api/
-│   │   ├── auth/
-│   │   │   └── [...all]/route.ts        # Better Auth handler
+│   │   ├── auth/[...all]/route.ts     # Better Auth handler
 │   │   └── todos/
-│   │       ├── route.ts                 # List/create todos
-│   │       └── [todoId]/route.ts        # Get/update/delete one todo
-│   ├── components/
-│   │   ├── todo-board.tsx               # Todo board component
-│   │   └── todo-board-shell.tsx         # Todo board wrapper with auth
-│   ├── lib/
-│   │   ├── auth/
-│   │   │   ├── client.ts                # Better Auth client
-│   │   │   ├── current-user.ts         # Get current app user helper
-│   │   │   └── index.ts                 # Auth exports
-│   │   └── db/
-│   │       ├── index.ts                 # Drizzle db singleton
-│   │       └── schema.ts               # Drizzle schema
-│   ├── (auth)/
-│   │   ├── layout.tsx                   # Auth pages layout
+│   │       ├── route.ts                # List/create todos
+│   │       └── [todoId]/route.ts       # Get/update/delete todo
+│   ├── (auth)/                         # Auth route group
 │   │   ├── signin/page.tsx             # Sign-in page
-│   │   └── signup/page.tsx             # Sign-up page
-│   ├── globals.css
-│   ├── icon.svg
-│   ├── layout.tsx                      # Root layout
-│   ├── manifest.json
-│   ├── page.tsx                       # Landing page
-│   └── providers.tsx                   # Session provider
-├── drizzle/
-│   └── ...                            # Drizzle migrations/meta
+│   │   ├── signup/page.tsx             # Sign-up page
+│   │   └── layout.tsx                  # Auth layout
+│   ├── lib/fonts.ts                    # Caveat font
+│   ├── layout.tsx                     # Root layout
+│   ├── page.tsx                       # Landing/Dashboard page
+│   ├── providers.tsx                   # Auth provider
+│   └── globals.css                     # Global styles
+├── components/                         # Feature-wise components
+│   ├── todo/
+│   │   ├── todo-board.tsx              # Todo board component
+│   │   └── todo-board-shell.tsx        # Todo board wrapper
+├── lib/                               # Core utilities
+│   ├── db/index.ts                     # Drizzle db instance
+│   ├── auth/
+│   │   ├── index.ts                    # Better Auth config
+│   │   ├── client.ts                   # Client auth
+│   │   ├── current-user.ts             # Server user helper
+│   │   └── utils.ts                    # Auth utilities
+│   └── utils/cn.ts                     # classnames utility
+├── hooks/                             # Custom React hooks
+│   └── use-auth.ts                     # Auth hook
+├── types/                             # TypeScript types
+│   ├── todo.ts                        # Todo types
+│   └── user.ts                        # User types
+├── drizzle/                           # Database schema & migrations
+│   ├── schema.ts                       # All table definitions
+│   └── meta/                          # Drizzle metadata
+├── validations/                       # Zod schemas
+│   ├── auth.ts                        # Profile validation
+│   └── todo.ts                        # Todo validation
+├── config/                            # App configuration
+│   └── app.ts                         # Config exports
+├── FOLDER_STRUCTURE.md                 # Folder structure docs
 ├── drizzle.config.ts
-├── .env.example
+├── tsconfig.json
 ├── package.json
-└── public/
-    └── logo.jpg
+└── .env.example
 ```
 
 ## Database Models
