@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { authClient } from "@/app/lib/auth/client";
+import { authClient } from "@/lib/auth/client";
 import { caveat } from "@/app/lib/fonts";
 
 export default function SignIn() {
