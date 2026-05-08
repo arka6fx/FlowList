@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 
-import { db } from "@/app/lib/db";
-import { getCurrentUser } from "@/app/lib/auth/current-user";
+import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth/current-user";
 import { caveat } from "@/app/lib/fonts";
-import TodoBoardShell from "@/app/components/todo-board-shell";
+import TodoBoardShell from "@/components/todo/todo-board-shell";
 import { todos } from "@/drizzle/schema";
 
 export default async function Home() {
