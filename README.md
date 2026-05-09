@@ -1,17 +1,19 @@
 # FlowList
 
-A full-stack Todo app to create, organize, and complete tasks with a clean UI and a PostgreSQL-backed API.
+A full-stack todo app to create, organize, and complete tasks with a polished UI and a PostgreSQL-backed API.
 
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router)
 - **Language:** TypeScript
-- **UI:** React 19 + Tailwind CSS v4
+- **UI:** React 19 + Tailwind CSS v4 + shadcn/ui (base-nova, `@base-ui/react`)
+- **Animations:** Framer Motion
 - **Database:** PostgreSQL (Neon)
 - **ORM:** Drizzle ORM
 - **HTTP Client:** Axios
 - **Authentication:** Better Auth (Google OAuth)
-- **Fonts:** Caveat (handwriting), System fonts (UI)
+- **Toasts:** Sonner
+- **Fonts:** Caveat (handwriting, Google Font), Geist (UI, Google Font)
 - **PWA:** Web App Manifest
 
 ## Project Structure
@@ -22,43 +24,45 @@ FlowList/
 │   ├── api/
 │   │   ├── auth/[...all]/route.ts     # Better Auth handler
 │   │   └── todos/
-│   │       ├── route.ts                # List/create todos
-│   │       └── [todoId]/route.ts       # Get/update/delete todo
-│   ├── (auth)/                         # Auth route group
-│   │   ├── signin/page.tsx             # Sign-in page
-│   │   ├── signup/page.tsx             # Sign-up page
-│   │   └── layout.tsx                  # Auth layout
-│   ├── lib/fonts.ts                    # Caveat font
-│   ├── layout.tsx                     # Root layout
-│   ├── page.tsx                       # Landing/Dashboard page
-│   ├── providers.tsx                   # Auth provider
-│   └── globals.css                     # Global styles
-├── components/                         # Feature-wise components
+│   │       ├── route.ts               # List/create todos
+│   │       └── [todoId]/route.ts      # Get/update/delete todo
+│   ├── (auth)/                        # Auth route group
+│   │   ├── signin/page.tsx            # Sign-in page
+│   │   ├── signup/page.tsx            # Sign-up page
+│   │   └── layout.tsx                 # Auth layout
+│   ├── lib/fonts.ts                   # Caveat font export
+│   ├── layout.tsx                     # Root layout (Geist font)
+│   ├── page.tsx                       # Landing/Dashboard server component
+│   ├── providers.tsx                  # Toaster provider
+│   └── globals.css                    # Global styles + CSS variables
+├── components/
+│   ├── landing/
+│   │   └── landing-page.tsx           # Animated landing page
 │   ├── todo/
-│   │   ├── todo-board.tsx              # Todo board component
-│   │   └── todo-board-shell.tsx        # Todo board wrapper
-├── lib/                               # Core utilities
-│   ├── db/index.ts                     # Drizzle db instance
+│   │   ├── todo-board.tsx             # Todo board (client)
+│   │   └── todo-board-shell.tsx       # Hydration guard wrapper
+│   └── ui/                            # shadcn/ui components
+│       ├── badge.tsx
+│       ├── button.tsx
+│       ├── card.tsx
+│       ├── checkbox.tsx
+│       ├── dialog.tsx
+│       ├── input.tsx
+│       ├── separator.tsx
+│       ├── sonner.tsx
+│       └── textarea.tsx
+├── lib/
+│   ├── db/index.ts                    # Drizzle db instance
 │   ├── auth/
-│   │   ├── index.ts                    # Better Auth config
-│   │   ├── client.ts                   # Client auth
-│   │   ├── current-user.ts             # Server user helper
-│   │   └── utils.ts                    # Auth utilities
-│   └── utils/cn.ts                     # classnames utility
-├── hooks/                             # Custom React hooks
-│   └── use-auth.ts                     # Auth hook
-├── types/                             # TypeScript types
-│   ├── todo.ts                        # Todo types
-│   └── user.ts                        # User types
-├── drizzle/                           # Database schema & migrations
-│   ├── schema.ts                       # All table definitions
+│   │   ├── index.ts                   # Better Auth server config
+│   │   ├── client.ts                  # Better Auth client
+│   │   ├── current-user.ts            # getCurrentUser() helper
+│   │   └── utils.ts                   # requireAuth() + parseId()
+│   └── utils.ts                       # cn() via clsx + tailwind-merge
+├── drizzle/
+│   ├── schema.ts                      # All table definitions
 │   └── meta/                          # Drizzle metadata
-├── validations/                       # Zod schemas
-│   ├── auth.ts                        # Profile validation
-│   └── todo.ts                        # Todo validation
-├── config/                            # App configuration
-│   └── app.ts                         # Config exports
-├── FOLDER_STRUCTURE.md                 # Folder structure docs
+├── components.json                    # shadcn config
 ├── drizzle.config.ts
 ├── tsconfig.json
 ├── package.json
@@ -165,10 +169,12 @@ export const authVerifications = pgTable("verification", {
 ## Todo Frontend
 
 - Authenticated users are taken to the Todo board on `/`
-- Guests still see the landing page and can navigate to sign up/sign in
+- Guests see an animated landing page and can navigate to sign up/sign in
 - The board supports create, read, update, delete, and complete toggling
-- Cat sound feedback on task creation and completion
-- Toast notifications for user actions
+- Edit dialog (shadcn Dialog) for updating title and description inline
+- Sonner toasts for user action feedback (success and error states)
+- Framer Motion animations: entrance animations, `AnimatePresence` for list add/remove, `layout` prop for smooth reordering
+- Optimistic updates: UI changes immediately, rolls back on error
 
 ## Getting Started
 

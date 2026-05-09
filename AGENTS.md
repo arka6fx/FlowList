@@ -16,8 +16,11 @@
 - **API routes don't use Zod schemas** — Zod schemas exist in `validations/todo.ts` but all API routes do manual validation inline
 - **`useSyncExternalStore`** in `TodoBoardShell` — acts as hydration guard to prevent server/client mismatch on mount
 - **Database** — `node-postgres` Pool (not Neon serverless), configured in `lib/db/index.ts`
-- **`app/providers.tsx`** — no-op wrapper; no theme or session provider exists
-- **`lib/utils/cn.ts`** — simple class joiner; not `clsx`/`twMerge`
+- **`app/providers.tsx`** — wraps the app with `<Toaster>` (sonner); no theme or session provider
+- **`lib/utils.ts`** — `cn()` using `clsx` + `tailwind-merge`; import from `@/lib/utils`
+- **shadcn/ui** — style `base-nova` (uses `@base-ui/react`, not Radix). Polymorphism via `render` prop not `asChild`. Button-as-Link requires `nativeButton={false} render={<Link href="…" />}`. Installed: `button`, `card`, `input`, `textarea`, `badge`, `separator`, `dialog`, `checkbox`, `sonner`
+- **Sonner** — `toast()` / `toast.success()` / `toast.error()` from `"sonner"`; `<Toaster>` in `providers.tsx` with `theme="dark"` hardcoded (no next-themes)
+- **Framer Motion** — used throughout: board entrance animations, `AnimatePresence` + `motion.li layout` for todo add/remove, `whileInView` + `viewport={{ once: true }}` for landing page scroll reveals
 
 ## Critical Rules
 
