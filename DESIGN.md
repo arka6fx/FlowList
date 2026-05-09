@@ -7,12 +7,13 @@ A dark-first, warm-toned visual system inspired by editorial planners and calm p
 ## Stack
 
 - **Styling:** Tailwind CSS v4 via `@import "tailwindcss"` + `@theme inline` in `app/globals.css` (no `tailwind.config.js`)
-- **Colors:** Defined as CSS custom properties via `@theme inline` — use semantic token classes (`bg-background`, `text-foreground`, `border-border`, etc.) instead of hardcoded hex values
-- **Components:** Custom, no component library — all UI is hand-built
-- **Icons:** None — no icon library in use
-- **Fonts:** Caveat (handwriting, Google Font) for headings; system font stack for body UI
-- **Dark mode:** Class-based via `@custom-variant dark`; no `next-themes`
-- **Utilities:** `cn()` from `@/lib/utils/cn.ts` (simple class joiner, not `clsx`/`twMerge`)
+- **Component library:** shadcn/ui with `base-nova` style — uses `@base-ui/react` primitives (not Radix UI)
+- **Icons:** Lucide React (`lucide-react`)
+- **Fonts:** Caveat (handwriting, Google Font) for display; Geist (Google Font) for UI body
+- **Animations:** Framer Motion — entrance animations, `AnimatePresence` for list transitions, `whileInView` for scroll reveals
+- **Toasts:** Sonner (`sonner`) — `toast()` / `toast.success()` / `toast.error()`; hardcoded `theme="dark"`
+- **Dark mode:** Always dark; no `next-themes`
+- **Utilities:** `cn()` from `@/lib/utils` (clsx + tailwind-merge)
 
 ---
 
@@ -23,38 +24,36 @@ A focused task board, not a generic dashboard.
 - Dark ink backgrounds (`#211f24`) with warm rose/magenta accents.
 - Translucent card surfaces with visible borders.
 - Handwriting display headings (Caveat) for personality.
-- Subtle linear gradients on primary actions.
-- Toast animations with slide-in/slide-out for feedback.
-- Minimal motion — purposeful, not decorative.
+- Subtle linear gradients and radial gradients on hero sections.
+- Purposeful motion — entrance animations, smooth list reordering, press feedback.
 
 ---
 
 ## Color Tokens
 
-All semantic tokens are defined in `app/globals.css` via `@theme inline` and map to Tailwind utility classes. Use `bg-background`, `text-foreground`, `border-border`, etc. instead of hardcoded hex values.
+All semantic tokens are defined in `app/globals.css` via `@theme inline` and map to Tailwind utility classes. Use semantic token classes instead of hardcoded hex values.
 
 | Token | Class | Hex | Usage |
 |-------|-------|-----|-------|
 | `background` | `bg-background` | `#211f24` | Page canvas |
 | `foreground` | `text-foreground` | `#f8f1f2` | Primary text |
-| `card` | `bg-card` | `#2b232a` | Paper card backgrounds |
-| `card-secondary` | `bg-card-secondary` | `#3d2b33` | Column cards |
-| `card-alt` | `bg-card-alt` | `#382a32` | Alternate surfaces |
-| `primary` | `bg-primary` / `from-primary` | `#c14f63` | Primary action (gradient start) |
-| `primary-end` | `to-primary-end` | `#98384b` | Primary action (gradient end) |
-| `muted` | `bg-muted` | `#6c3240` | Badges, pills, toast |
-| `muted-fg` | `text-muted-fg` | `#ddb5bc` | Supporting copy |
-| `muted-light` | `text-muted-light` | `#d8a9b2` | Lighter supporting copy |
+| `card` | `bg-card` | `#2b232a` | Card backgrounds |
+| `primary` | `bg-primary` / `text-primary` | `#c14f63` | Primary actions, accents |
+| `primary-foreground` | `text-primary-foreground` | `#fff5f7` | Text on primary bg |
+| `secondary` | `bg-secondary` | `#3d2b33` | Secondary surfaces |
+| `secondary-foreground` | `text-secondary-foreground` | `#f5dde2` | Text on secondary bg |
+| `muted` | `bg-muted` | `#6c3240` | Badges, pills |
+| `muted-foreground` | `text-muted-foreground` | `#ddb5bc` | Supporting copy |
+| `accent` | `bg-accent` | `#382a32` | Alternate surfaces |
+| `accent-foreground` | `text-accent-foreground` | `#ffe4e8` | Bright highlight text |
 | `border` | `border-border` | `#713743` | Panel borders |
-| `border-light` | `border-border-light` | `#8d4451` | Accent borders |
-| `border-muted` | `border-border-muted` | `#6d3440` | Subtle borders |
-| `input` | `bg-input` | `#3a2a32` | Form field backgrounds |
-| `input-border` | `border-input-border` | `#75404c` | Field borders |
-| `ring` | `focus:border-ring` / `focus:ring-ring` | `#cd5f74` | Focus rings |
-| `destructive` | `bg-destructive` / `border-destructive` | `#d66b7e` | Delete/error actions |
-| `accent` | `text-accent` | `#ffe4e8` | Bright highlight text |
+| `input` | `border-input` | `#75404c` | Input field border |
+| `ring` | `ring-ring` | `#cd5f74` | Focus rings |
+| `destructive` | `bg-destructive` | `#d66b7e` | Delete/error actions |
 
-Complex gradients (radial/custom blends) remain as inline hex values in their respective components.
+Input background is not a semantic token — apply via `className="bg-[var(--color-input-bg)]"` (`#3a2a32`).
+
+Complex gradients (radial/custom blends) remain as inline values in their respective components.
 
 ---
 
@@ -62,129 +61,139 @@ Complex gradients (radial/custom blends) remain as inline hex values in their re
 
 | Token | Source | Usage |
 |-------|--------|-------|
-| `caveat.className` | `next/font/google` (Caveat, wght 600–700) | Display headings, hero text, decorative elements |
-| System stack | `SF Pro Text, SF Pro Display, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif` | Body text, controls, forms |
+| `caveat.className` | `next/font/google` (Caveat) | Display headings, hero text, decorative elements |
+| `font-sans` / default | Geist (loaded in root layout) | Body text, controls, forms |
 
 Guidelines:
 
 - Hero headings use Caveat at `text-3xl` to `text-5xl` with semibold weight.
-- Section headings use Caveat for personality.
-- Body text uses `text-sm` to `text-base` in system fonts with `leading-relaxed`.
-- Uppercase technical labels use `text-xs uppercase tracking-[0.16em]` with system font.
-
----
-
-## Patterns
-
-### Glass panel (sticky header)
-
-```tsx
-className="sticky top-3 z-40 rounded-2xl border border-[#8a4a58]/55 bg-[linear-gradient(135deg,rgba(74,43,53,0.72),rgba(37,29,36,0.62))] px-4 py-3 shadow-[0_12px_30px_rgba(8,6,8,0.35)] backdrop-blur-xl"
-```
-
-### Paper card
-
-```tsx
-className="rounded-2xl border border-[#6d3440] bg-[#2b232a] p-5"
-```
-
-### Task item
-
-```tsx
-className="rounded-2xl border border-[#8a4251] bg-[#9f4657] p-3 text-[#fff5f7]"
-```
-
-### Toast notification
-
-```tsx
-className="toast-cat fixed right-4 top-4 z-50 rounded-xl border border-[#8d4451] bg-[#6c3240] px-4 py-2 text-sm font-semibold text-[#ffe8ec] shadow-[0_12px_24px_rgba(0,0,0,0.35)]"
-```
-
-Animated via CSS `@keyframes toast-in` (0.08s ease-out) and `toast-out` (0.12s ease-in, 0.72s delay).
-
-### Primary button
-
-```tsx
-className="rounded-xl bg-[linear-gradient(120deg,#c14f63,#98384b)] px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:brightness-110"
-```
-
-### Outline button
-
-```tsx
-className="rounded-xl border border-[#8d4451] bg-[#362730] px-5 py-3 text-sm font-semibold text-[#ffdce2] transition hover:bg-[#412e38]"
-```
+- Section headings use Caveat for personality; body headings use `font-semibold`.
+- Body text uses `text-sm` to `text-base` with `leading-relaxed`.
+- Uppercase technical labels use `text-xs uppercase tracking-widest`.
 
 ---
 
 ## Components
 
+### Button (shadcn base-nova)
+
+Uses `@base-ui/react`. Polymorphism via `render` prop, **not** `asChild`.
+
+```tsx
+// Standard button
+<Button variant="outline" size="sm">Sign in</Button>
+
+// Button rendered as Next.js Link
+<Button nativeButton={false} render={<Link href="/signup" />}>Sign up</Button>
+```
+
+Variants: `default`, `outline`, `ghost`, `destructive`. Sizes: `sm`, `default`, `lg`, `icon`, `icon-xs`.
+
+### Card
+
+```tsx
+<Card>
+  <CardHeader>
+    <CardTitle>Title</CardTitle>
+    <CardDescription>Subtitle</CardDescription>
+  </CardHeader>
+  <CardContent>…</CardContent>
+  <CardFooter>…</CardFooter>
+</Card>
+```
+
 ### Todo Board
 
-Two-column layout: "To Do" and "Done". Each column is a `rounded-3xl` bordered card containing a list of task items. Column header shows title + count badge.
+Two-column layout (`grid gap-4 sm:grid-cols-2`): "To Do" and "Done". Each column is a Card containing an animated list of task items. Column header shows title + count Badge.
+
+List animations via `AnimatePresence` + `motion.li` with `layout` prop for smooth reordering.
 
 ### Task Row
 
-Compact card with checkbox, title (strikethrough when done), optional description, and Edit/Delete actions. Supports inline editing mode that swaps text display for input fields.
+shadcn Checkbox for toggle, title (line-through when done), optional description, and Edit/Delete icon buttons. Edit opens a shadcn Dialog — no inline editing state.
+
+```tsx
+<Dialog>
+  <DialogTrigger render={<Button variant="ghost" size="icon-xs" />}>
+    <PencilIcon className="size-3.5" />
+  </DialogTrigger>
+  <DialogContent>…</DialogContent>
+</Dialog>
+```
 
 ### Inputs
 
-Rounded-xl fields with dark background, rose-tinted border, and teal/rose focus ring. Placeholder text is a lighter muted rose.
+shadcn Input/Textarea with `border-input` border and `bg-[var(--color-input-bg)]` background.
 
-### Badges
+```tsx
+<Input className="h-9 bg-[var(--color-input-bg)]" />
+```
 
-Used for column counts. Rounded-full pills with dark background and light text.
+### Toast
 
-### Checkbox
+Sonner — import `toast` from `"sonner"`:
 
-Custom 20×20px rounded square, toggling between outline (unchecked) and filled (checked) states.
+```tsx
+toast.success("Task created")
+toast.error("Failed to delete")
+toast("Task completed 🎉")
+```
+
+`<Toaster position="top-right" richColors />` lives in `app/providers.tsx`.
+
+### Badge
+
+```tsx
+<Badge variant="secondary">Daily focus system</Badge>
+<Badge variant="outline">Morning</Badge>
+```
 
 ---
 
 ## Layout
 
-The app uses a single-column centered layout:
+Single-column centered container:
 
 ```tsx
-<main className="min-h-screen bg-[#211f24] text-[#f8f1f2]">
-  <div className="mx-auto w-full max-w-7xl px-4 pb-10 pt-6 sm:px-6 lg:px-8 lg:pt-8">
+<main className="min-h-screen bg-background text-foreground">
+  <div className="mx-auto w-full max-w-5xl px-4 pb-10 pt-6 sm:px-6 lg:px-8 lg:pt-8">
 ```
 
-The todo board splits into two columns at `sm:grid-cols-2`:
+Todo board splits into two columns at `sm:grid-cols-2`.
 
-```tsx
-<section className="grid gap-4 sm:grid-cols-2">
+---
+
+## Animations (Framer Motion)
+
+| Pattern | Usage |
+|---------|-------|
+| Entrance (`opacity 0→1, y offset→0`) | Board header, form, columns on mount |
+| `AnimatePresence` + `motion.li layout` | Todo add/remove with smooth reorder |
+| `whileInView` + `viewport={{ once: true }}` | Landing page section reveals |
+| `whileTap={{ scale: 0.97 }}` | Button press feedback |
+| Stagger variants (`staggerChildren: 0.1`) | Hero section children |
+
+Common easing constant:
+
+```ts
+const ease = [0.25, 0.46, 0.45, 0.94] as const;
 ```
-
-Landing page is single-column with full-width sections.
 
 ---
 
 ## Interaction
 
-- Hover lift: `hover:-translate-y-0.5` on primary buttons
-- Hover background: `hover:bg-[#3a2a32]` on secondary elements
-- Focus: visible outline/border color change (custom)
+- Press feedback: `whileTap={{ scale: 0.97 }}` on primary CTA buttons
+- Focus: shadcn default ring (`ring-ring`)
 - Disabled: `disabled:cursor-not-allowed disabled:opacity-60`
-- Loading: "Saving..." text replaces button label during async operations
-- Cat sound: `playCatSound()` — triangle oscillator audio feedback on create/toggle
-- Toast auto-dismisses after ~900ms
-- Optimistic updates: UI updates immediately, rolls back on error
-
----
-
-## Animations
-
-| Name | Duration | Purpose |
-|------|----------|---------|
-| `toast-in` | 80ms ease-out | Slide-in notification |
-| `toast-out` | 120ms ease-in (0.72s delay) | Slide-out notification |
-| `stat-sheen` | 5.8s infinite | Decorative card shimmer (landing page) |
+- Loading: button label changes during async operations (e.g. "Saving…")
+- Optimistic updates: UI changes immediately, rolls back on error
 
 ---
 
 ## Responsive
 
 - **Mobile-first:** Single column by default, multi-column at `sm:` and `md:` breakpoints
-- **Max width:** `max-w-7xl` for content container
-- **No sticky behavior** on mobile
-- **Auth pages:** Centered card layout, full viewport height
+- **Max width:** `max-w-5xl` for content container
+- **Sticky nav:** landing page header is `sticky top-3` with backdrop blur
+- **Auth pages:** Centered Card layout, full viewport height

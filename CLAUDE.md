@@ -47,6 +47,17 @@ Defined in `drizzle/schema.ts`. Key tables:
 
 `@/` maps to the project root (configured in `tsconfig.json`).
 
+### UI components (shadcn/ui)
+
+- Style: `base-nova` — uses `@base-ui/react` primitives, **not Radix UI**
+- Polymorphism uses the `render` prop, not `asChild`
+- Rendering a Button as a Next.js Link requires both `nativeButton={false}` and `render={<Link href="…" />}`
+- Installed components: `button`, `card`, `input`, `textarea`, `badge`, `separator`, `dialog`, `checkbox`, `sonner`
+- `cn()` utility is at `lib/utils.ts` (uses `clsx` + `tailwind-merge`)
+- Toast notifications via `sonner`: use `toast()`, `toast.success()`, `toast.error()` from `"sonner"`; `<Toaster>` lives in `app/providers.tsx`
+- Edit dialog uses shadcn `Dialog` — not inline editing state
+- Animations via Framer Motion: entrance animations on board/header, `AnimatePresence` + `layout` on todo lists, `whileInView` on landing page sections
+
 ## Environment variables
 
 Required:
