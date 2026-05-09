@@ -27,7 +27,7 @@ export default function TodoBoardShell({ initialTodos, username }: TodoBoardShel
 
     if (!mounted) {
         return (
-            <main className="min-h-screen bg-[#edf4ff] dark:bg-[#090c14]" aria-hidden="true" />
+            <main className="min-h-screen bg-[#edf4ff] dark:bg-background" aria-hidden="true" />
         );
     }
 

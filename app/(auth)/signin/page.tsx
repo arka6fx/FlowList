@@ -1,22 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { GlobeIcon, CheckIcon } from "lucide-react";
 
 import { authClient } from "@/lib/auth/client";
 import { caveat } from "@/app/lib/fonts";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 export default function SignIn() {
-    const [isMounted, setIsMounted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    if (!isMounted) {
-        return null;
-    }
 
     const handleGoogleSignIn = async () => {
         setIsLoading(true);
@@ -32,50 +28,69 @@ export default function SignIn() {
     };
 
     return (
-        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#211f24] px-5 py-10">
-            <div className="pointer-events-none absolute -top-16 left-0 h-72 w-72 rounded-full bg-[#7b3a49]/35 blur-3xl" />
-            <div className="pointer-events-none absolute -bottom-20 right-0 h-80 w-80 rounded-full bg-[#5b2a36]/30 blur-3xl" />
+        <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-5 py-10">
+            <div className="pointer-events-none absolute -top-16 left-0 size-72 rounded-full bg-primary/20 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-20 right-0 size-80 rounded-full bg-primary/15 blur-3xl" />
 
-            <div className="relative w-full max-w-md rounded-[28px] border border-[#713743] bg-[#2b232a]/95 p-7 shadow-[0_24px_50px_rgba(12,8,10,0.5)] backdrop-blur sm:p-8">
-                <p className={`${caveat.className} mb-3 inline-flex rounded-full border border-[#8d4451] bg-[#6c3240] px-3 py-1 font-mono text-xs uppercase tracking-[0.2em] text-[#ffe4e8]`}>
-                    Welcome back
-                </p>
-                <h1 className={`${caveat.className} text-3xl font-semibold text-[#ffe4e8]`}>Sign in to FlowList</h1>
-                <p className="mt-2 text-sm text-[#d8a9b2]">Continue with Google to access your tasks.</p>
+            <motion.div
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, ease: "easeOut" }}
+                className="relative w-full max-w-sm"
+            >
+                <Card className="shadow-[0_24px_50px_rgba(12,8,10,0.5)]">
+                    <CardHeader className="gap-1">
+                        <p className={cn(
+                            caveat.className,
+                            "inline-flex w-fit rounded-full border border-border bg-secondary px-3 py-1 text-xs uppercase tracking-widest text-accent-foreground"
+                        )}>
+                            Welcome back
+                        </p>
+                        <h1 className={cn(caveat.className, "text-3xl font-semibold text-accent-foreground")}>
+                            Sign in to FlowList
+                        </h1>
+                        <p className="text-sm text-muted-foreground">Continue with Google to access your tasks.</p>
+                    </CardHeader>
 
-                <ul className="mt-4 space-y-2 text-sm text-[#e6bcc4]">
-                    <li className="flex items-center gap-2">
-                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#6c3240] text-xs font-bold text-[#ffdce2]">
-                            ✓
-                        </span>
-                        Secure sign in with your Google account
-                    </li>
-                    <li className="flex items-center gap-2">
-                        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#6c3240] text-xs font-bold text-[#ffdce2]">
-                            ✓
-                        </span>
-                        Instantly continue your existing todo board
-                    </li>
-                </ul>
+                    <CardContent className="flex flex-col gap-4">
+                        <ul className="flex flex-col gap-2">
+                            {[
+                                "Secure sign in with your Google account",
+                                "Instantly continue your existing todo board",
+                            ].map((item) => (
+                                <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-secondary">
+                                        <CheckIcon className="size-3 text-primary" />
+                                    </span>
+                                    {item}
+                                </li>
+                            ))}
+                        </ul>
 
-                <button
-                    type="button"
-                    disabled={isLoading}
-                    onClick={() => {
-                        void handleGoogleSignIn();
-                    }}
-                    className="mt-7 w-full rounded-xl bg-[linear-gradient(120deg,#c14f63,#98384b)] px-5 py-3 text-sm font-semibold text-white shadow-[0_10px_24px_rgba(64,20,32,0.4)] transition hover:-translate-y-0.5 hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
-                >
-                    {isLoading ? "Connecting Google..." : "Continue with Google"}
-                </button>
+                        <motion.div whileTap={{ scale: 0.98 }}>
+                            <Button
+                                type="button"
+                                disabled={isLoading}
+                                onClick={() => void handleGoogleSignIn()}
+                                className="w-full"
+                                size="lg"
+                            >
+                                <GlobeIcon data-icon="inline-start" />
+                                {isLoading ? "Connecting…" : "Continue with Google"}
+                            </Button>
+                        </motion.div>
+                    </CardContent>
 
-                <p className="mt-5 text-center text-sm text-[#d8a9b2]">
-                    New here?{" "}
-                    <Link href="/signup" className="font-semibold text-[#ffe6eb] hover:underline">
-                        Create an account
-                    </Link>
-                </p>
-            </div>
+                    <CardFooter className="justify-center">
+                        <p className="text-sm text-muted-foreground">
+                            New here?{" "}
+                            <Link href="/signup" className="font-semibold text-accent-foreground hover:underline">
+                                Create an account
+                            </Link>
+                        </p>
+                    </CardFooter>
+                </Card>
+            </motion.div>
         </main>
     );
 }
