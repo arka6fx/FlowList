@@ -1,12 +1,15 @@
 # AGENTS.md
 
 ## Commands
+
 - `pnpm dev` — starts dev server (uses `--webpack` explicitly, not turbopack)
 - `pnpm lint` — ESLint only; no typecheck or formatter command
 - `pnpm build` — production build; requires `DATABASE_URL` at build time (Drizzle checks env on import)
 - `db:pull` / `db:generate` / `db:migrate` — use `drizzle-kit`; `drizzle.config.ts` reads `DATABASE_URL` directly via `dotenv/config`
+- No test suite is configured.
 
 ## Architecture
+
 - **Next.js 16 App Router** — `params` in route handlers is `Promise` (must `await`)
 - **Better Auth** — Google OAuth only; no email/password. Client uses `authClient.signIn.social({ provider: "google", callbackURL: "/" })`. No `<SessionProvider>` wrapper (Better Auth handles cookies natively)
 - **Tailwind CSS v4** — no `tailwind.config.js`; config is via `@import "tailwindcss"` + `@custom-variant` + `@theme inline` in CSS. PostCSS plugin is `@tailwindcss/postcss`. Colors use semantic tokens (`bg-background`, `text-foreground`, `border-border`) defined in `@theme inline` — don't add new hardcoded hex classes
@@ -25,15 +28,18 @@
 ## Critical Rules
 
 ### Responses
+
 - Keep responses concise and to the point unless the user asks otherwise.
 
 ### Planning Mode
+
 - Always ask clarifying questions.
 - Never assume design, tech stack, or features.
 - Use deep-dive sub-agents to assist with research.
 - Use deep-dive sub-agents to review different aspects of your plan before presenting to the user.
 
 ### Change / Edit Mode
+
 - Never implement features yourself when possible — use sub-agents.
 - Identify changes from the plan that can be implemented in parallel, and use sub-agents to implement them efficiently.
 - When using sub-agents to implement features, act as a coordinator only.
@@ -41,13 +47,41 @@
 - After completing features (large or small), always run lint, type check, and `next build` to verify code quality.
 
 ### Database Schema Changes
+
 - Whenever you make changes to the database schema, ALWAYS run `drizzle-kit generate` and `drizzle-kit migrate`.
 - NEVER run `drizzle-kit push`.
 
 ### Testing
+
 - Use any testing tools, libraries, or scripts available in the project for testing your changes.
 - Never assume your changes simply work — always test.
 - If the project has no testing tools, scripts, MCP tools, skills, etc., ask the user whether testing should be skipped.
 
+### Environment Variables
+
+Required:
+
+- `DATABASE_URL` — PostgreSQL connection string
+- `BETTER_AUTH_URL` — e.g. `http://localhost:3000`
+- `BETTER_AUTH_SECRET` — long random string (min 32 chars)
+- `NEXT_PUBLIC_BETTER_AUTH_URL` — same as `BETTER_AUTH_URL`
+- `GOOGLE_CLIENT_ID` — Google OAuth client ID
+- `GOOGLE_CLIENT_SECRET` — Google OAuth client secret
+
+### Auth Flow
+
+- `lib/auth/index.ts` — server-side Better Auth config, uses Drizzle adapter
+- `lib/auth/client.ts` — client-side `authClient` (used in client components for signOut etc.)
+- `lib/auth/current-user.ts` — `getCurrentUser()`: reads session via `auth.api.getSession`, queries DB for user row, returns `{ id, username, email }` or `null`
+- `lib/auth/utils.ts` — `requireAuth()`: used in API route handlers; returns user or a `NextResponse` 401 if not authenticated; always check `if (auth instanceof NextResponse) return auth`
+- `app/api/auth/[...all]/route.ts` — Better Auth catch-all handler
+
+### Data Flow (todos)
+
+- `app/page.tsx` (server component): calls `getCurrentUser()`, fetches todos server-side via Drizzle, passes `initialTodos` to `TodoBoardShell`
+- `components/todo/todo-board-shell.tsx` — thin wrapper that renders `TodoBoard`
+- `components/todo/todo-board.tsx` — client component; manages all todo state locally with optimistic updates; calls REST API via Axios for create/toggle/update/delete
+
 ### UI Design
+
 - Always follow the `DESIGN.md` design system (color palette, component patterns, visual conventions) when creating or reviewing UI.
