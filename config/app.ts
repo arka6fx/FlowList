@@ -14,8 +14,3 @@ export const authConfig = {
         process.env.NEXT_PUBLIC_APP_URL ?? "https://flowlist.arka6fx.com",
     ],
 } as const;
-
-export const databaseConfig = {
-    maxConnections: Number(process.env.DB_MAX_CONNECTIONS) || 10,
-    connectionTimeout: Number(process.env.DB_CONNECTION_TIMEOUT) || 5000,
-} as const;
