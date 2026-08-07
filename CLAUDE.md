@@ -5,8 +5,17 @@
 - `pnpm dev` — starts dev server (uses `--webpack` explicitly, not turbopack)
 - `pnpm lint` — ESLint only; no typecheck or formatter command
 - `pnpm build` — production build; requires `DATABASE_URL` at build time (Drizzle checks env on import)
+- `pnpm preview` — `opennextjs-cloudflare build && opennextjs-cloudflare preview` (local Cloudflare preview)
+- `pnpm deploy` — `opennextjs-cloudflare build && opennextjs-cloudflare deploy` (deploy to Cloudflare)
 - `db:pull` / `db:generate` / `db:migrate` — use `drizzle-kit`; `drizzle.config.ts` reads `DATABASE_URL` directly via `dotenv/config`
 - No test suite is configured.
+
+## Deployment
+
+- **Hosting:** Cloudflare (Workers via OpenNext), NOT Vercel. Worker name is `flowlist`, custom domain `flowlist.arka6fx.com`. Config: `wrangler.jsonc` + `open-next.config.ts`.
+- **CI/CD:** GitHub Actions `.github/workflows/deploy.yml` builds and deploys on every push to `main`. The workflow also sets the Worker secrets.
+- **Windows limitation:** `opennextjs-cloudflare build` fails on Windows (it needs symlink privileges — EPERM). Always build/deploy via the GitHub Actions workflow, not locally.
+- **Env vars live in GitHub Actions secrets and Worker secrets** (`DATABASE_URL`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, `NEXT_PUBLIC_BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`). Do not commit a `.env` file.
 
 ## Architecture
 
@@ -18,7 +27,7 @@
 - **`Todo.id` is a serial (number)**, not UUID — important when constructing API paths or comparing IDs
 - **API routes don't use Zod schemas** — Zod schemas exist in `validations/todo.ts` but all API routes do manual validation inline
 - **`useSyncExternalStore`** in `TodoBoardShell` — acts as hydration guard to prevent server/client mismatch on mount
-- **Database** — `node-postgres` Pool (not Neon serverless), configured in `lib/db/index.ts`
+- **Database** — Neon serverless driver (`@neondatabase/serverless`) via `drizzle-orm/neon-http`, configured in `lib/db/index.ts`. Do NOT use `pg` (node-postgres) — it hangs on Cloudflare Workers.
 - **`app/providers.tsx`** — wraps the app with `<Toaster>` (sonner); no theme or session provider
 - **`lib/utils.ts`** — `cn()` using `clsx` + `tailwind-merge`; import from `@/lib/utils`
 - **shadcn/ui** — style `base-nova` (uses `@base-ui/react`, not Radix). Polymorphism via `render` prop not `asChild`. Button-as-Link requires `nativeButton={false} render={<Link href="…" />}`. Installed: `button`, `card`, `input`, `textarea`, `badge`, `separator`, `dialog`, `checkbox`, `sonner`
