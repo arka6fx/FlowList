@@ -11,7 +11,7 @@ export const authConfig = {
     trustedOrigins: [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        process.env.NEXT_PUBLIC_APP_URL ?? "https://flow-list.vercel.app",
+        process.env.NEXT_PUBLIC_APP_URL ?? "https://flowlist.arka6fx.com",
     ],
 } as const;
 
