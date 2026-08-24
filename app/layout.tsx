@@ -9,7 +9,9 @@ const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 export const metadata: Metadata = {
     title: "FlowList",
     description: "A focused todo app for planning your day with clarity.",
-    metadataBase: new URL("https://flowlist.arka6fx.com"),
+    metadataBase: new URL(
+        process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "http://localhost:3000"
+    ),
     applicationName: "FlowList",
     keywords: ["FlowList", "todo app", "task manager", "productivity", "next.js"],
     manifest: "/manifest.json",
@@ -20,7 +22,7 @@ export const metadata: Metadata = {
     openGraph: {
         title: "FlowList",
         description: "Plan tasks, track progress, and stay focused with FlowList.",
-        url: "https://flowlist.arka6fx.com",
+        url: process.env.NEXT_PUBLIC_BETTER_AUTH_URL ?? "http://localhost:3000",
         siteName: "FlowList",
         type: "website",
     },
