@@ -12,7 +12,7 @@
 
 ## Deployment
 
-- **Hosting:** Cloudflare (Workers via OpenNext), NOT Vercel. Worker name is `flowlist`, custom domain `flowlist.arka6fx.com`. Config: `wrangler.jsonc` + `open-next.config.ts`.
+- **Hosting:** Cloudflare (Workers via OpenNext), NOT Vercel. Worker name is `flowlist`, served at `https://flowlist.arkagarai292.workers.dev` (workers.dev URL, no custom domain). Config: `wrangler.jsonc` + `open-next.config.ts`.
 - **CI/CD:** GitHub Actions `.github/workflows/deploy.yml` builds and deploys on every push to `main`. The workflow also sets the Worker secrets.
 - **Windows limitation:** `opennextjs-cloudflare build` fails on Windows (it needs symlink privileges — EPERM). Always build/deploy via the GitHub Actions workflow, not locally.
 - **Env vars live in GitHub Actions secrets and Worker secrets** (`DATABASE_URL`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, `NEXT_PUBLIC_BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`). Do not commit a `.env` file.

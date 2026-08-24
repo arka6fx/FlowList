@@ -7,8 +7,5 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  "workers_dev": false,
-  "routes": [
-    { "pattern": "flowlist.arka6fx.com", "custom_domain": true }
-  ]
+  "workers_dev": true
 }
