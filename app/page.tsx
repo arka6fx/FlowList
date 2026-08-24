@@ -1,6 +1,6 @@
 import { desc, eq } from "drizzle-orm";
 
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/current-user";
 import TodoBoardShell from "@/components/todo/todo-board-shell";
 import { todos } from "@/drizzle/schema";
@@ -10,7 +10,7 @@ export default async function Home() {
   const user = await getCurrentUser();
 
   if (user) {
-    const userTodos = await db.select().from(todos).where(eq(todos.userId, user.id)).orderBy(desc(todos.createdAt));
+      const userTodos = await (await getDb()).select().from(todos).where(eq(todos.userId, user.id)).orderBy(desc(todos.createdAt));
 
     return <TodoBoardShell initialTodos={userTodos.map((todo) => ({ ...todo, createdAt: todo.createdAt.toISOString(), updatedAt: todo.updatedAt.toISOString() }))} username={user.name} />;
   }

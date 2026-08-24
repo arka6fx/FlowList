@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { authUsers } from "@/drizzle/schema";
 import { verifyPassword } from "@/lib/auth/password";
 import { createSession } from "@/lib/auth/session";
@@ -20,6 +20,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: parsed.error.issues[0]?.message ?? "Invalid input" }, { status: 400 });
     }
 
+    const db = await getDb();
     const email = parsed.data.email.toLowerCase();
     const [user] = await db
         .select({ id: authUsers.id, name: authUsers.name, email: authUsers.email, passwordHash: authUsers.passwordHash })

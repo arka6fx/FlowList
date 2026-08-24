@@ -1,7 +1,7 @@
 import { and, eq, gt } from "drizzle-orm";
 import { cookies } from "next/headers";
 
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { authSessions, authUsers } from "@/drizzle/schema";
 
 export const SESSION_COOKIE = "flowlist_session";
@@ -13,6 +13,7 @@ const createToken = () => {
 };
 
 export const createSession = async (userId: string) => {
+    const db = await getDb();
     const token = createToken();
     const expiresAt = new Date(Date.now() + SESSION_TTL_DAYS * 24 * 60 * 60 * 1000);
 
@@ -35,6 +36,7 @@ export const getSessionUser = async () => {
     const token = cookieStore.get(SESSION_COOKIE)?.value;
     if (!token) return null;
 
+    const db = await getDb();
     const [row] = await db
         .select({ id: authUsers.id, name: authUsers.name, email: authUsers.email })
         .from(authSessions)
@@ -50,6 +52,7 @@ export const destroySession = async () => {
     const token = cookieStore.get(SESSION_COOKIE)?.value;
 
     if (token) {
+        const db = await getDb();
         await db.delete(authSessions).where(eq(authSessions.id, token));
     }
 

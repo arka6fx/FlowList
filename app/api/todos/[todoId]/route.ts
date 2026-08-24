@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { and, eq } from "drizzle-orm";
 
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { requireAuth, parseId } from "@/lib/auth/utils";
 import { todos } from "@/drizzle/schema";
 
@@ -16,7 +16,7 @@ export async function GET(_: NextRequest, context: { params: Promise<{ todoId: s
         return NextResponse.json({ message: "Invalid todo id" }, { status: 400 });
     }
 
-    const [todo] = await db
+    const [todo] = await (await getDb())
         .select()
         .from(todos)
         .where(and(eq(todos.id, todoId), eq(todos.userId, auth.id)))
@@ -40,7 +40,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ todoI
         return NextResponse.json({ message: "Invalid todo id" }, { status: 400 });
     }
 
-    const [existingTodo] = await db
+    const [existingTodo] = await (await getDb())
         .select({ id: todos.id })
         .from(todos)
         .where(and(eq(todos.id, todoId), eq(todos.userId, auth.id)))
@@ -60,7 +60,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ todoI
         return NextResponse.json({ message: "Title cannot be empty" }, { status: 400 });
     }
 
-    const [todo] = await db
+    const [todo] = await (await getDb())
         .update(todos)
         .set({
             ...(title !== undefined ? { title } : {}),
@@ -85,7 +85,7 @@ export async function DELETE(_: NextRequest, context: { params: Promise<{ todoId
         return NextResponse.json({ message: "Invalid todo id" }, { status: 400 });
     }
 
-    const [existingTodo] = await db
+    const [existingTodo] = await (await getDb())
         .select({ id: todos.id })
         .from(todos)
         .where(and(eq(todos.id, todoId), eq(todos.userId, auth.id)))
@@ -95,7 +95,7 @@ export async function DELETE(_: NextRequest, context: { params: Promise<{ todoId
         return NextResponse.json({ message: "Todo not found" }, { status: 404 });
     }
 
-    await db.delete(todos).where(eq(todos.id, existingTodo.id));
+    await (await getDb()).delete(todos).where(eq(todos.id, existingTodo.id));
 
     return NextResponse.json({ message: "Todo deleted" });
 }
