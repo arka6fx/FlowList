@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 
-import { db } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import { requireAuth } from "@/lib/auth/utils";
 import { todos } from "@/drizzle/schema";
 
@@ -9,6 +9,7 @@ export async function GET() {
     const auth = await requireAuth();
     if (auth instanceof NextResponse) return auth;
 
+    const db = await getDb();
     const userTodos = await db.select().from(todos).where(eq(todos.userId, auth.id)).orderBy(desc(todos.createdAt));
 
     return NextResponse.json({ todos: userTodos });
@@ -26,7 +27,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ message: "Title is required" }, { status: 400 });
     }
 
-    const [todo] = await db
+    const [todo] = await (await getDb())
         .insert(todos)
         .values({
             title: rawTitle,
