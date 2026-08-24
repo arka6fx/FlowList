@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlusIcon, Trash2Icon, PencilIcon, LogOutIcon } from "lucide-react";
 
-import { authClient } from "@/lib/auth/client";
 import { caveat } from "@/app/lib/fonts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -136,9 +135,11 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
 
     const handleSignOut = async () => {
         setIsSigningOut(true);
-        await authClient.signOut({
-            fetchOptions: { onSuccess: () => { window.location.href = "/signin"; } },
-        });
+        try {
+            await fetch("/api/auth/signout", { method: "POST" });
+        } finally {
+            window.location.href = "/signin";
+        }
     };
 
     return (

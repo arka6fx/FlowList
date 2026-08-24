@@ -1,9 +1,7 @@
-import Link from "next/link";
 import { desc, eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth/current-user";
-import { caveat } from "@/app/lib/fonts";
 import TodoBoardShell from "@/components/todo/todo-board-shell";
 import { todos } from "@/drizzle/schema";
 import { LandingPage } from "@/components/landing/landing-page";
@@ -14,7 +12,7 @@ export default async function Home() {
   if (user) {
     const userTodos = await db.select().from(todos).where(eq(todos.userId, user.id)).orderBy(desc(todos.createdAt));
 
-    return <TodoBoardShell initialTodos={userTodos.map((todo) => ({ ...todo, createdAt: todo.createdAt.toISOString(), updatedAt: todo.updatedAt.toISOString() }))} username={user.username} />;
+    return <TodoBoardShell initialTodos={userTodos.map((todo) => ({ ...todo, createdAt: todo.createdAt.toISOString(), updatedAt: todo.updatedAt.toISOString() }))} username={user.name} />;
   }
 
   return <LandingPage />;

@@ -2,32 +2,40 @@
 
 ## Commands
 
-- `pnpm dev` — starts dev server (uses `--webpack` explicitly, not turbopack)
-- `pnpm lint` — ESLint only; no typecheck or formatter command
-- `pnpm build` — production build; requires `DATABASE_URL` at build time (Drizzle checks env on import)
-- `pnpm preview` — `opennextjs-cloudflare build && opennextjs-cloudflare preview` (local Cloudflare preview)
-- `pnpm deploy` — `opennextjs-cloudflare build && opennextjs-cloudflare deploy` (deploy to Cloudflare)
-- `db:pull` / `db:generate` / `db:migrate` — use `drizzle-kit`; `drizzle.config.ts` reads `DATABASE_URL` directly via `dotenv/config`
+- `bun install` — install dependencies (Bun is the package manager; no pnpm)
+- `bun run dev` — starts dev server (uses `--webpack` explicitly, not turbopack); D1 bindings work locally via miniflare (`initOpenNextCloudflareForDev` in `next.config.ts`)
+- `bun run lint` — ESLint only; no typecheck or formatter command
+- `bun run build` — production build
+- `bun run preview` — `opennextjs-cloudflare build && opennextjs-cloudflare preview` (local Cloudflare preview)
+- `bun run deploy` — `opennextjs-cloudflare build && opennextjs-cloudflare deploy` (deploy to Cloudflare)
+- `db:generate` — generate Drizzle migrations for SQLite (`drizzle-kit generate`)
+- Apply migrations with `wrangler d1 execute flowlist-db --local|--remote --file=drizzle/XXXX.sql`
 - No test suite is configured.
 
 ## Deployment
 
 - **Hosting:** Cloudflare (Workers via OpenNext), NOT Vercel. Worker name is `flowlist`, served at `https://flowlist.arkagarai292.workers.dev` (workers.dev URL, no custom domain). Config: `wrangler.jsonc` + `open-next.config.ts`.
-- **CI/CD:** GitHub Actions `.github/workflows/deploy.yml` builds and deploys on every push to `main`. The workflow also sets the Worker secrets.
+- **Database:** Cloudflare D1 (`flowlist-db`, binding name `DB`). Schema in `drizzle/schema.ts` uses `drizzle-orm/sqlite-core`. Do NOT reintroduce Postgres/Neon.
+- **CI/CD:** GitHub Actions `.github/workflows/deploy.yml` builds and deploys on every push to `main`. Uses Bun (`oven-sh/setup-bun`), not pnpm.
 - **Windows limitation:** `opennextjs-cloudflare build` fails on Windows (it needs symlink privileges — EPERM). Always build/deploy via the GitHub Actions workflow, not locally.
-- **Env vars live in GitHub Actions secrets and Worker secrets** (`DATABASE_URL`, `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`, `NEXT_PUBLIC_BETTER_AUTH_URL`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`). Do not commit a `.env` file.
+- **Env vars:** only `NEXT_PUBLIC_APP_URL` (set in the workflow at build time; optional — code falls back to the workers.dev URL). Do not commit a `.env` file.
 
 ## Architecture
 
 - **Next.js 16 App Router** — `params` in route handlers is `Promise` (must `await`)
-- **Better Auth** — Google OAuth only; no email/password. Client uses `authClient.signIn.social({ provider: "google", callbackURL: "/" })`. No `<SessionProvider>` wrapper (Better Auth handles cookies natively)
+- **Auth** — hand-rolled email/password auth (no Better Auth):
+  - `lib/auth/password.ts` — PBKDF2 hashing via Web Crypto (`hashPassword` / `verifyPassword`)
+  - `lib/auth/session.ts` — session tokens in the `session` table + httpOnly cookie `flowlist_session`; `createSession` / `getSessionUser` / `destroySession`
+  - `lib/auth/current-user.ts` — `getCurrentUser()` returns `{ id, name, email }` or `null`
+  - `lib/auth/utils.ts` — `requireAuth()` for API routes; always guard with `if (auth instanceof NextResponse) return auth`
+  - API routes: `POST /api/auth/signup`, `POST /api/auth/signin`, `POST /api/auth/signout`, `GET /api/auth/session`
+  - Client code calls these endpoints directly with `fetch`; session state via `useAuth()` in `hooks/use-auth.ts`
 - **Tailwind CSS v4** — no `tailwind.config.js`; config is via `@import "tailwindcss"` + `@custom-variant` + `@theme inline` in CSS. PostCSS plugin is `@tailwindcss/postcss`. Colors use semantic tokens (`bg-background`, `text-foreground`, `border-border`) defined in `@theme inline` — don't add new hardcoded hex classes
-- **`requireAuth()`** — returns `NextResponse` (401) or user object; always guard with `if (auth instanceof NextResponse) return auth`
 - **`parseId()`** — utility in `lib/auth/utils.ts` that validates positive integer IDs; returns `null` for invalid input
-- **`Todo.id` is a serial (number)**, not UUID — important when constructing API paths or comparing IDs
-- **API routes don't use Zod schemas** — Zod schemas exist in `validations/todo.ts` but all API routes do manual validation inline
+- **`Todo.id` is an autoincrement integer**, not UUID — important when constructing API paths or comparing IDs
+- **API routes don't use Zod schemas** — Zod schemas exist in `validations/todo.ts` but all todo API routes do manual validation inline (auth routes do use Zod)
 - **`useSyncExternalStore`** in `TodoBoardShell` — acts as hydration guard to prevent server/client mismatch on mount
-- **Database** — Neon serverless driver (`@neondatabase/serverless`) via `drizzle-orm/neon-http`, configured in `lib/db/index.ts`. Do NOT use `pg` (node-postgres) — it hangs on Cloudflare Workers.
+- **Database access** — `lib/db/index.ts`: `drizzle(getCloudflareContext().env.DB)` from `drizzle-orm/d1`. Bindings come from `wrangler.jsonc` (`d1_databases`), typed by generated Worker config types. Never use node-postgres or Neon drivers.
 - **`app/providers.tsx`** — wraps the app with `<Toaster>` (sonner); no theme or session provider
 - **`lib/utils.ts`** — `cn()` using `clsx` + `tailwind-merge`; import from `@/lib/utils`
 - **shadcn/ui** — style `base-nova` (uses `@base-ui/react`, not Radix). Polymorphism via `render` prop not `asChild`. Button-as-Link requires `nativeButton={false} render={<Link href="…" />}`. Installed: `button`, `card`, `input`, `textarea`, `badge`, `separator`, `dialog`, `checkbox`, `sonner`
@@ -57,7 +65,9 @@
 
 ### Database Schema Changes
 
-- Whenever you make changes to the database schema, ALWAYS run `drizzle-kit generate` and `drizzle-kit migrate`.
+- Whenever you change `drizzle/schema.ts`, ALWAYS run `bunx drizzle-kit generate`, then apply the new SQL file to both local and remote D1:
+  - `bunx wrangler d1 execute flowlist-db --local --file=drizzle/XXXX.sql -y`
+  - `bunx wrangler d1 execute flowlist-db --remote --file=drizzle/XXXX.sql -y`
 - NEVER run `drizzle-kit push`.
 
 ### Testing
@@ -66,30 +76,11 @@
 - Never assume your changes simply work — always test.
 - If the project has no testing tools, scripts, MCP tools, skills, etc., ask the user whether testing should be skipped.
 
-### Environment Variables
-
-Required:
-
-- `DATABASE_URL` — PostgreSQL connection string
-- `BETTER_AUTH_URL` — e.g. `http://localhost:3000`
-- `BETTER_AUTH_SECRET` — long random string (min 32 chars)
-- `NEXT_PUBLIC_BETTER_AUTH_URL` — same as `BETTER_AUTH_URL`
-- `GOOGLE_CLIENT_ID` — Google OAuth client ID
-- `GOOGLE_CLIENT_SECRET` — Google OAuth client secret
-
-### Auth Flow
-
-- `lib/auth/index.ts` — server-side Better Auth config, uses Drizzle adapter
-- `lib/auth/client.ts` — client-side `authClient` (used in client components for signOut etc.)
-- `lib/auth/current-user.ts` — `getCurrentUser()`: reads session via `auth.api.getSession`, queries DB for user row, returns `{ id, username, email }` or `null`
-- `lib/auth/utils.ts` — `requireAuth()`: used in API route handlers; returns user or a `NextResponse` 401 if not authenticated; always check `if (auth instanceof NextResponse) return auth`
-- `app/api/auth/[...all]/route.ts` — Better Auth catch-all handler
-
 ### Data Flow (todos)
 
 - `app/page.tsx` (server component): calls `getCurrentUser()`, fetches todos server-side via Drizzle, passes `initialTodos` to `TodoBoardShell`
 - `components/todo/todo-board-shell.tsx` — thin wrapper that renders `TodoBoard`
-- `components/todo/todo-board.tsx` — client component; manages all todo state locally with optimistic updates; calls REST API via Axios for create/toggle/update/delete
+- `components/todo/todo-board.tsx` — client component; manages all todo state locally with optimistic updates; calls REST API via Axios for create/toggle/update/delete; sign-out POSTs `/api/auth/signout`
 
 ### UI Design
 

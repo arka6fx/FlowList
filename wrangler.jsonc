@@ -7,5 +7,12 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
-  "workers_dev": true
+  "workers_dev": true,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "flowlist-db",
+      "database_id": "dd8aa5f5-972c-4da7-9579-379b6b2d6226"
+    }
+  ]
 }

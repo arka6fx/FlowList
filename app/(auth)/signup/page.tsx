@@ -1,23 +1,47 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { GlobeIcon, CheckIcon } from "lucide-react";
+import { CheckIcon, LoaderIcon } from "lucide-react";
 
-import { authClient } from "@/lib/auth/client";
 import { caveat } from "@/app/lib/fonts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 export default function SignUp() {
+    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleGoogleSignUp = async () => {
+    const handleEmailSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setError(null);
         setIsLoading(true);
+
+        const formData = new FormData(event.currentTarget);
+        const name = String(formData.get("name") ?? "").trim();
+        const email = String(formData.get("email") ?? "").trim();
+        const password = String(formData.get("password") ?? "");
+
         try {
-            await authClient.signIn.social({ provider: "google", callbackURL: "/" });
+            const res = await fetch("/api/auth/signup", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password }),
+            });
+
+            if (!res.ok) {
+                const data = (await res.json().catch(() => null)) as { message?: string } | null;
+                setError(data?.message ?? "Could not create your account.");
+                return;
+            }
+
+            router.push("/");
+            router.refresh();
         } finally {
             setIsLoading(false);
         }
@@ -45,14 +69,14 @@ export default function SignUp() {
                         <h1 className={cn(caveat.className, "text-3xl font-semibold text-accent-foreground")}>
                             Create your account
                         </h1>
-                        <p className="text-sm text-muted-foreground">Use Google to create your account in one step.</p>
+                        <p className="text-sm text-muted-foreground">Sign up with your email in seconds.</p>
                     </CardHeader>
 
                     <CardContent className="flex flex-col gap-4">
                         <ul className="flex flex-col gap-2">
                             {[
-                                "No password setup required",
-                                "Start planning tasks in seconds",
+                                "Start planning tasks right away",
+                                "No credit card, no fuss",
                             ].map((item) => (
                                 <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-secondary">
@@ -63,18 +87,47 @@ export default function SignUp() {
                             ))}
                         </ul>
 
-                        <motion.div whileTap={{ scale: 0.98 }}>
-                            <Button
-                                type="button"
+                        <form onSubmit={handleEmailSignUp} className="flex flex-col gap-3">
+                            <Input
+                                name="name"
+                                type="text"
+                                placeholder="Your name"
+                                autoComplete="name"
+                                required
+                                minLength={2}
                                 disabled={isLoading}
-                                onClick={() => void handleGoogleSignUp()}
-                                className="w-full"
-                                size="lg"
-                            >
-                                <GlobeIcon data-icon="inline-start" />
-                                {isLoading ? "Connecting…" : "Sign up with Google"}
-                            </Button>
-                        </motion.div>
+                            />
+                            <Input
+                                name="email"
+                                type="email"
+                                placeholder="you@example.com"
+                                autoComplete="email"
+                                required
+                                disabled={isLoading}
+                            />
+                            <Input
+                                name="password"
+                                type="password"
+                                placeholder="Password (min. 8 characters)"
+                                autoComplete="new-password"
+                                required
+                                minLength={8}
+                                disabled={isLoading}
+                            />
+
+                            {error && (
+                                <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                                    {error}
+                                </p>
+                            )}
+
+                            <motion.div whileTap={{ scale: 0.98 }}>
+                                <Button type="submit" disabled={isLoading} className="w-full" size="lg">
+                                    {isLoading && <LoaderIcon data-icon="inline-start" className="animate-spin" />}
+                                    {isLoading ? "Creating account…" : "Create account"}
+                                </Button>
+                            </motion.div>
+                        </form>
                     </CardContent>
 
                     <CardFooter className="flex-col gap-2">

@@ -1,27 +1,46 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { GlobeIcon, CheckIcon } from "lucide-react";
+import { CheckIcon, LoaderIcon } from "lucide-react";
 
-import { authClient } from "@/lib/auth/client";
 import { caveat } from "@/app/lib/fonts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 
 export default function SignIn() {
+    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleGoogleSignIn = async () => {
+    const handleEmailSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setError(null);
         setIsLoading(true);
 
+        const formData = new FormData(event.currentTarget);
+        const email = String(formData.get("email") ?? "").trim();
+        const password = String(formData.get("password") ?? "");
+
         try {
-            await authClient.signIn.social({
-                provider: "google",
-                callbackURL: "/",
+            const res = await fetch("/api/auth/signin", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
             });
+
+            if (!res.ok) {
+                const data = (await res.json().catch(() => null)) as { message?: string } | null;
+                setError(data?.message ?? "Invalid email or password.");
+                return;
+            }
+
+            router.push("/");
+            router.refresh();
         } finally {
             setIsLoading(false);
         }
@@ -49,13 +68,13 @@ export default function SignIn() {
                         <h1 className={cn(caveat.className, "text-3xl font-semibold text-accent-foreground")}>
                             Sign in to FlowList
                         </h1>
-                        <p className="text-sm text-muted-foreground">Continue with Google to access your tasks.</p>
+                        <p className="text-sm text-muted-foreground">Sign in with your email to access your tasks.</p>
                     </CardHeader>
 
                     <CardContent className="flex flex-col gap-4">
                         <ul className="flex flex-col gap-2">
                             {[
-                                "Secure sign in with your Google account",
+                                "Your tasks stay synced across devices",
                                 "Instantly continue your existing todo board",
                             ].map((item) => (
                                 <li key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -67,18 +86,38 @@ export default function SignIn() {
                             ))}
                         </ul>
 
-                        <motion.div whileTap={{ scale: 0.98 }}>
-                            <Button
-                                type="button"
+                        <form onSubmit={handleEmailSignIn} className="flex flex-col gap-3">
+                            <Input
+                                name="email"
+                                type="email"
+                                placeholder="you@example.com"
+                                autoComplete="email"
+                                required
                                 disabled={isLoading}
-                                onClick={() => void handleGoogleSignIn()}
-                                className="w-full"
-                                size="lg"
-                            >
-                                <GlobeIcon data-icon="inline-start" />
-                                {isLoading ? "Connecting…" : "Continue with Google"}
-                            </Button>
-                        </motion.div>
+                            />
+                            <Input
+                                name="password"
+                                type="password"
+                                placeholder="Password"
+                                autoComplete="current-password"
+                                required
+                                minLength={8}
+                                disabled={isLoading}
+                            />
+
+                            {error && (
+                                <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                                    {error}
+                                </p>
+                            )}
+
+                            <motion.div whileTap={{ scale: 0.98 }}>
+                                <Button type="submit" disabled={isLoading} className="w-full" size="lg">
+                                    {isLoading && <LoaderIcon data-icon="inline-start" className="animate-spin" />}
+                                    {isLoading ? "Signing in…" : "Sign in"}
+                                </Button>
+                            </motion.div>
+                        </form>
                     </CardContent>
 
                     <CardFooter className="justify-center">

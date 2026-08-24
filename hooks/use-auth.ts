@@ -2,57 +2,45 @@
 
 import { useEffect, useState } from "react";
 
-import { authClient } from "@/lib/auth/client";
-
 type SessionUser = {
     id: string;
-    email: string;
     name: string;
-    image?: string | null;
+    email: string;
 };
+
+export type AuthUser = SessionUser;
+
+async function fetchSession(): Promise<SessionUser | null> {
+    try {
+        const res = await fetch("/api/auth/session", { cache: "no-store" });
+        if (!res.ok) return null;
+        const data = (await res.json()) as { user: SessionUser | null };
+        return data.user ?? null;
+    } catch {
+        return null;
+    }
+}
 
 export function useAuth() {
     const [user, setUser] = useState<SessionUser | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        authClient.getSession().then((data: unknown) => {
-            const result = data as { user?: SessionUser; session?: { user: SessionUser } } | null;
-            if (result?.session?.user) {
-                const userData = result.session.user;
-                setUser({
-                    id: userData.id,
-                    email: userData.email,
-                    name: userData.name ?? "",
-                    image: userData.image,
-                });
-            } else {
-                setUser(null);
+        let cancelled = false;
+        fetchSession().then((data) => {
+            if (!cancelled) {
+                setUser(data);
+                setIsLoading(false);
             }
-            setIsLoading(false);
-        }).catch(() => {
-            setUser(null);
-            setIsLoading(false);
         });
+        return () => {
+            cancelled = true;
+        };
     }, []);
 
     return { user, isLoading };
 }
 
 export async function getSession() {
-    try {
-        const data = await authClient.getSession() as { session?: { user: SessionUser } } | null;
-        if (data?.session?.user) {
-            const userData = data.session.user;
-            return {
-                id: userData.id,
-                email: userData.email,
-                name: userData.name ?? "",
-                image: userData.image,
-            } as SessionUser;
-        }
-        return null;
-    } catch {
-        return null;
-    }
+    return fetchSession();
 }

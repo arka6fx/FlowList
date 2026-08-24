@@ -50,7 +50,7 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ todoI
         return NextResponse.json({ message: "Todo not found" }, { status: 404 });
     }
 
-    const body = await req.json();
+    const body = (await req.json()) as { title?: unknown; description?: unknown; completed?: unknown };
     const title = typeof body.title === "string" ? body.title.trim() : undefined;
     const description =
         typeof body.description === "string" ? body.description.trim() : body.description === null ? null : undefined;
