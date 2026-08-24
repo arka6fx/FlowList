@@ -1,6 +1,6 @@
 # FlowList
 
-A full-stack todo app to create, organize, and complete tasks with a polished UI and a PostgreSQL-backed API.
+A full-stack todo app to create, organize, and complete tasks with a polished UI, deployed on Cloudflare Workers with a D1 database.
 
 ## Tech Stack
 
@@ -8,12 +8,14 @@ A full-stack todo app to create, organize, and complete tasks with a polished UI
 - **Language:** TypeScript
 - **UI:** React 19 + Tailwind CSS v4 + shadcn/ui (base-nova, `@base-ui/react`)
 - **Animations:** Framer Motion
-- **Database:** PostgreSQL (Neon)
-- **ORM:** Drizzle ORM
+- **Database:** Cloudflare D1 (SQLite)
+- **ORM:** Drizzle ORM (`drizzle-orm/sqlite-core` + `drizzle-orm/d1`)
 - **HTTP Client:** Axios
-- **Authentication:** Better Auth (Google OAuth)
+- **Authentication:** Custom email/password auth (PBKDF2 + session cookies)
+- **Package Manager:** Bun
+- **Hosting:** Cloudflare Workers via `@opennextjs/cloudflare`
 - **Toasts:** Sonner
-- **Fonts:** Caveat (handwriting, Google Font), Geist (UI, Google Font)
+- **Fonts:** Caveat (handwriting), Geist (UI)
 - **PWA:** Web App Manifest
 
 ## Project Structure
@@ -22,7 +24,11 @@ A full-stack todo app to create, organize, and complete tasks with a polished UI
 FlowList/
 ├── app/                               # Next.js App Router
 │   ├── api/
-│   │   ├── auth/[...all]/route.ts     # Better Auth handler
+│   │   ├── auth/
+│   │   │   ├── signin/route.ts        # POST - sign in
+│   │   │   ├── signup/route.ts        # POST - sign up
+│   │   │   ├── signout/route.ts       # POST - sign out
+│   │   │   └── session/route.ts       # GET  - current session
 │   │   └── todos/
 │   │       ├── route.ts               # List/create todos
 │   │       └── [todoId]/route.ts      # Get/update/delete todo
@@ -42,111 +48,33 @@ FlowList/
 │   │   ├── todo-board.tsx             # Todo board (client)
 │   │   └── todo-board-shell.tsx       # Hydration guard wrapper
 │   └── ui/                            # shadcn/ui components
-│       ├── badge.tsx
-│       ├── button.tsx
-│       ├── card.tsx
-│       ├── checkbox.tsx
-│       ├── dialog.tsx
-│       ├── input.tsx
-│       ├── separator.tsx
-│       ├── sonner.tsx
-│       └── textarea.tsx
 ├── lib/
-│   ├── db/index.ts                    # Drizzle db instance
+│   ├── db/index.ts                    # Drizzle over D1 binding
 │   ├── auth/
-│   │   ├── index.ts                   # Better Auth server config
-│   │   ├── client.ts                  # Better Auth client
+│   │   ├── password.ts                # PBKDF2 hash/verify (Web Crypto)
+│   │   ├── session.ts                 # Session create/read/destroy + cookie
 │   │   ├── current-user.ts            # getCurrentUser() helper
 │   │   └── utils.ts                   # requireAuth() + parseId()
 │   └── utils.ts                       # cn() via clsx + tailwind-merge
 ├── drizzle/
-│   ├── schema.ts                      # All table definitions
-│   └── meta/                          # Drizzle metadata
-├── components.json                    # shadcn config
+│   ├── schema.ts                      # All table definitions (SQLite)
+│   └── *.sql                          # Generated migrations
 ├── drizzle.config.ts
-├── tsconfig.json
-├── package.json
+├── wrangler.jsonc                     # Worker config + D1 binding
+├── open-next.config.ts
+├── next.config.ts
 └── .env.example
 ```
 
 ## Database Models
 
-```ts
-import { boolean, foreignKey, index, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+Three tables in D1 (`drizzle/schema.ts`):
 
-export const authUsers = pgTable("user", {
-    id: text("id").primaryKey(),
-    name: text("name").notNull(),
-    email: text("email").notNull().unique(),
-    emailVerified: boolean("email_verified").notNull().default(false),
-    image: text("image"),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
-});
-
-export const todos = pgTable(
-    "Todo",
-    {
-        id: serial("id").primaryKey(),
-        title: text("title").notNull(),
-        description: text("description"),
-        completed: boolean("completed").notNull().default(false),
-        createdAt: timestamp("createdAt", { withTimezone: false, precision: 3 }).notNull().defaultNow(),
-        updatedAt: timestamp("updatedAt", { withTimezone: false, precision: 3 }).notNull(),
-        userId: text("userId").notNull(),
-    },
-    (table) => [
-        index("Todo_userId_idx").on(table.userId),
-        foreignKey({
-            columns: [table.userId],
-            foreignColumns: [authUsers.id],
-            name: "Todo_userId_fkey",
-        })
-            .onDelete("cascade")
-            .onUpdate("cascade"),
-    ],
-);
-
-export const authSessions = pgTable("session", {
-    id: text("id").primaryKey(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
-    token: text("token").notNull().unique(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
-    ipAddress: text("ip_address"),
-    userAgent: text("user_agent"),
-    userId: text("user_id")
-        .notNull()
-        .references(() => authUsers.id, { onDelete: "cascade" }),
-});
-
-export const authAccounts = pgTable("account", {
-    id: text("id").primaryKey(),
-    accountId: text("account_id").notNull(),
-    providerId: text("provider_id").notNull(),
-    userId: text("user_id")
-        .notNull()
-        .references(() => authUsers.id, { onDelete: "cascade" }),
-    accessToken: text("access_token"),
-    refreshToken: text("refresh_token"),
-    idToken: text("id_token"),
-    accessTokenExpiresAt: timestamp("access_token_expires_at", { withTimezone: true, mode: "date" }),
-    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { withTimezone: true, mode: "date" }),
-    scope: text("scope"),
-    password: text("password"),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }).notNull(),
-});
-
-export const authVerifications = pgTable("verification", {
-    id: text("id").primaryKey(),
-    identifier: text("identifier").notNull(),
-    value: text("value").notNull(),
-    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "date" }),
-});
-```
+| Table    | Purpose                                                                  |
+|----------|--------------------------------------------------------------------------|
+| `user`   | `id` (uuid text), `name`, `email` (unique), `password_hash`, `created_at` |
+| `session`| `id` (random token = cookie value), `user_id`, `expires_at`, `created_at` |
+| `Todo`   | `id` (autoincrement int), `title`, `description`, `completed`, `createdAt`, `updatedAt`, `userId` |
 
 ## API Endpoints
 
@@ -160,11 +88,16 @@ export const authVerifications = pgTable("verification", {
 | PATCH | `/api/todos/:todoId` | Update todo (title, description, completed) | Yes |
 | DELETE | `/api/todos/:todoId` | Delete a todo by ID | Yes |
 
-### Better Auth Routes (`/api/auth`)
+### Auth Routes (`/api/auth`)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET/POST | `/api/auth/[...all]` | Better Auth handler (signin, signout, session, callback) |
+| POST | `/api/auth/signup` | `{ name, email, password }` — creates user, starts session |
+| POST | `/api/auth/signin` | `{ email, password }` — verifies password, starts session |
+| POST | `/api/auth/signout` | Destroys the current session |
+| GET | `/api/auth/session` | Returns `{ user }` or `{ user: null }` |
+
+Sessions are httpOnly cookies (`flowlist_session`) backed by rows in the `session` table (30-day TTL). Passwords are hashed with PBKDF2-SHA256 (100k iterations) using the Workers-compatible Web Crypto API.
 
 ## Todo Frontend
 
@@ -180,68 +113,53 @@ export const authVerifications = pgTable("verification", {
 
 ### Prerequisites
 
-- Node.js 20+
-- pnpm
-- PostgreSQL database (Neon/local)
+- Bun 1.2+
+- Cloudflare account (for D1 + deploy)
 
 ### Installation
 
 ```bash
-pnpm install
-cp .env.example .env
+bun install
+cp .env.example .env   # optional; only NEXT_PUBLIC_APP_URL is used
 ```
-
-Set `DATABASE_URL` in `.env`.
-
-Also set:
-
-- `BETTER_AUTH_URL`
-- `BETTER_AUTH_SECRET`
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_CLIENT_SECRET`
 
 ### Database Setup
 
+D1 bindings come from `wrangler.jsonc`. Apply migrations:
+
 ```bash
-pnpm db:generate
-pnpm db:migrate
+# local dev database (miniflare state)
+bunx wrangler d1 execute flowlist-db --local --file=drizzle/0000_yielding_ender_wiggin.sql
+
+# production database
+bunx wrangler d1 execute flowlist-db --remote --file=drizzle/0000_yielding_ender_wiggin.sql
+```
+
+After changing `drizzle/schema.ts`, generate a new migration first:
+
+```bash
+bunx drizzle-kit generate
 ```
 
 ### Run the App
 
 ```bash
-pnpm dev
+bun run dev
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3000`. Local D1 access works through miniflare (`initOpenNextCloudflareForDev()` in `next.config.ts`).
 
-## Scripts
+## Deployment
 
-- `pnpm dev` - start development server
-- `pnpm build` - create production build
-- `pnpm start` - run production server
-- `pnpm lint` - run ESLint
-- `pnpm db:generate` - generate Drizzle migrations
-- `pnpm db:migrate` - run Drizzle migrations
-- `pnpm db:pull` - pull schema from database
+Deployments run automatically via GitHub Actions on every push to `main` (`.github/workflows/deploy.yml`). Required repo secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`.
 
-## Environment Variables
+Manual deploy (Linux/macOS only — OpenNext builds fail on Windows due to symlink privileges):
 
-Required for both local development and production:
-
-```env
-DATABASE_URL="postgresql://username:password@host:5432/database?sslmode=verify-full"
-BETTER_AUTH_URL="http://localhost:3000"  # Use production URL in production
-BETTER_AUTH_SECRET="replace-with-a-long-random-string"
-GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
+```bash
+bun run deploy
 ```
 
-For client-side (public):
-
-```env
-NEXT_PUBLIC_BETTER_AUTH_URL="http://localhost:3000"
-```
+Live URL: https://flowlist.arkagarai292.workers.dev
 
 ## License
 

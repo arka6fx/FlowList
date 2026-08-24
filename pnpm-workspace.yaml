@@ -1,8 +1,0 @@
-allowBuilds:
-  esbuild: true
-  workerd: true
-  '@prisma/engines': false
-  msw: false
-  prisma: false
-  sharp: false
-  unrs-resolver: false

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { desc, eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
-import { requireAuth, parseId } from "@/lib/auth/utils";
+import { requireAuth } from "@/lib/auth/utils";
 import { todos } from "@/drizzle/schema";
 
 export async function GET() {
@@ -18,18 +18,18 @@ export async function POST(req: NextRequest) {
     const auth = await requireAuth();
     if (auth instanceof NextResponse) return auth;
 
-    const body = await req.json();
-    const title = body.title?.trim();
-    const description = body.description?.trim() || null;
+    const body = (await req.json()) as { title?: unknown; description?: unknown };
+    const rawTitle = typeof body.title === "string" ? body.title.trim() : "";
+    const description = typeof body.description === "string" && body.description.trim() ? body.description.trim() : null;
 
-    if (!title) {
+    if (!rawTitle) {
         return NextResponse.json({ message: "Title is required" }, { status: 400 });
     }
 
     const [todo] = await db
         .insert(todos)
         .values({
-            title,
+            title: rawTitle,
             description,
             userId: auth.id,
             updatedAt: new Date(),
