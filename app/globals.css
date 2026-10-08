@@ -5,33 +5,33 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --color-background: #210124;
-    --color-foreground: #f4fdaf;
-    --color-card: #2e1032;
-    --color-card-secondary: #394f49;
-    --color-card-alt: #3a1c3f;
-    --color-primary: #efdd8d;
-    --color-primary-end: #d8c46c;
-    --color-muted: #65743a;
-    --color-muted-fg: #cdd79c;
-    --color-muted-light: #b9c487;
-    --color-border: #4a2c4f;
-    --color-border-light: #66416c;
-    --color-border-muted: #3f5a52;
-    --color-input: #5a3a60;
-    --color-input-bg: #26092a;
-    --color-ring: #efdd8d;
-    --color-destructive: #ff9a86;
-    --color-accent: #3a1c3f;
-    --color-placeholder: #8f9a6b;
-    --color-todo-row: #394f49;
-    --color-todo-row-border: #4a635b;
-    --color-todo-edit: #65743a;
-    --color-todo-edit-border: #efdd8d;
-    --color-todo-empty: #3a1c3f;
-    --color-todo-checked: #65743a;
-    --color-glow-warm: #65743a;
-    --color-glow-deep: #394f49;
+    --color-background: #f4fcf8;
+    --color-foreground: #3b1512;
+    --color-card: #fffdf9;
+    --color-card-secondary: #fdce86;
+    --color-card-alt: #ffe9c7;
+    --color-primary: #e0433a;
+    --color-primary-end: #fa7f46;
+    --color-muted: #f7c471;
+    --color-muted-fg: #8a5a3c;
+    --color-muted-light: #a9714a;
+    --color-border: #f0d2a8;
+    --color-border-light: #e6c08c;
+    --color-border-muted: #ecd0a6;
+    --color-input: #e6c08c;
+    --color-input-bg: #ffffff;
+    --color-ring: #fa7f46;
+    --color-destructive: #c2261e;
+    --color-accent: #ffe9c7;
+    --color-placeholder: #b08a6a;
+    --color-todo-row: #fdce86;
+    --color-todo-row-border: #f0c68a;
+    --color-todo-edit: #f7c471;
+    --color-todo-edit-border: #e0433a;
+    --color-todo-empty: #ffe9c7;
+    --color-todo-checked: #f7c471;
+    --color-glow-warm: #f7c471;
+    --color-glow-deep: #fdce86;
     --font-heading: var(--font-sans);
     --font-sans: var(--font-sans);
     --color-sidebar-ring: var(--sidebar-ring);
@@ -70,33 +70,33 @@ body {
 
 
 :root {
-    --background: #210124;
-    --foreground: #f4fdaf;
-    --card: #2e1032;
-    --card-foreground: #f4fdaf;
-    --popover: #2e1032;
-    --popover-foreground: #f4fdaf;
-    --primary: #efdd8d;
-    --primary-foreground: #210124;
-    --secondary: #394f49;
-    --secondary-foreground: #f4fdaf;
-    --muted: #65743a;
-    --muted-foreground: #cdd79c;
-    --accent: #3a1c3f;
-    --accent-foreground: #f4fdaf;
-    --destructive: #ff9a86;
-    --border: #4a2c4f;
-    --input: #5a3a60;
-    --ring: #efdd8d;
+    --background: #f4fcf8;
+    --foreground: #3b1512;
+    --card: #fffdf9;
+    --card-foreground: #3b1512;
+    --popover: #fffdf9;
+    --popover-foreground: #3b1512;
+    --primary: #e0433a;
+    --primary-foreground: #ffffff;
+    --secondary: #fdce86;
+    --secondary-foreground: #3b1512;
+    --muted: #f7c471;
+    --muted-foreground: #8a5a3c;
+    --accent: #ffe9c7;
+    --accent-foreground: #5a1d16;
+    --destructive: #c2261e;
+    --border: #f0d2a8;
+    --input: #e6c08c;
+    --ring: #fa7f46;
     --radius: 0.75rem;
-    --sidebar: #2e1032;
-    --sidebar-foreground: #f4fdaf;
-    --sidebar-primary: #efdd8d;
-    --sidebar-primary-foreground: #210124;
-    --sidebar-accent: #3a1c3f;
-    --sidebar-accent-foreground: #f4fdaf;
-    --sidebar-border: #4a2c4f;
-    --sidebar-ring: #efdd8d;
+    --sidebar: #fffdf9;
+    --sidebar-foreground: #3b1512;
+    --sidebar-primary: #e0433a;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #ffe9c7;
+    --sidebar-accent-foreground: #5a1d16;
+    --sidebar-border: #f0d2a8;
+    --sidebar-ring: #fa7f46;
     --ease-apple: cubic-bezier(0.32, 0.72, 0, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -108,14 +108,14 @@ body {
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(60rem 40rem at 10% -10%, rgba(101, 116, 58, 0.28), transparent 60%),
-      radial-gradient(50rem 36rem at 100% 0%, rgba(57, 79, 73, 0.35), transparent 60%),
-      radial-gradient(45rem 30rem at 50% 110%, rgba(239, 221, 141, 0.10), transparent 60%);
+      radial-gradient(60rem 40rem at 10% -10%, rgba(247, 196, 113, 0.45), transparent 60%),
+      radial-gradient(50rem 36rem at 100% 0%, rgba(250, 127, 70, 0.18), transparent 60%),
+      radial-gradient(45rem 30rem at 50% 110%, rgba(212, 248, 234, 0.9), transparent 60%);
     background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     }
   ::selection {
-    background: rgba(239, 221, 141, 0.35);
+    background: rgba(250, 127, 70, 0.3);
     }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
