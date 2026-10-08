@@ -149,7 +149,7 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
                     initial={{ opacity: 0, y: -16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="mb-6 rounded-3xl border border-border/80 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] bg-[radial-gradient(circle_at_top_left,#394f49_0%,#2e1032_55%,#210124_100%)] p-5"
+                    className="mb-6 rounded-3xl border border-border/80 shadow-[0_20px_50px_-20px_rgba(150,70,20,0.3)] bg-[radial-gradient(circle_at_top_left,#fdce86_0%,#fff3df_55%,#f4fcf8_100%)] p-5"
                 >
                     <div className="flex items-center justify-between gap-4">
                         <div>
@@ -330,7 +330,7 @@ function TodoRow({ todo, index, onToggle, onDelete, onSave }: TodoRowProps) {
             exit={{ opacity: 0, x: -12, transition: { duration: 0.18 } }}
             transition={{ type: "spring", stiffness: 420, damping: 32, delay: index * 0.03 }}
             whileHover={{ y: -2 }}
-            className="rounded-2xl border border-border-muted/60 bg-secondary/70 p-3 backdrop-blur-sm transition-shadow hover:shadow-[0_10px_28px_-12px_rgba(0,0,0,0.7)]"
+            className="rounded-2xl border border-border-muted/60 bg-secondary/70 p-3 backdrop-blur-sm transition-shadow hover:shadow-[0_10px_28px_-12px_rgba(150,70,20,0.3)]"
         >
             <div className="flex items-start gap-3">
                 <div className="mt-0.5 shrink-0">

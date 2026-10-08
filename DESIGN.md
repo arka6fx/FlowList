@@ -1,6 +1,6 @@
 # Design System
 
-A dark-first, warm-toned visual system inspired by editorial planners and calm productivity.
+A light, warm autumn-toned visual system inspired by editorial planners and calm productivity.
 
 ---
 
@@ -11,8 +11,8 @@ A dark-first, warm-toned visual system inspired by editorial planners and calm p
 - **Icons:** Lucide React (`lucide-react`)
 - **Fonts:** Caveat (handwriting, Google Font) for display; Geist (Google Font) for UI body
 - **Animations:** Framer Motion — entrance animations, `AnimatePresence` for list transitions, `whileInView` for scroll reveals
-- **Toasts:** Sonner (`sonner`) — `toast()` / `toast.success()` / `toast.error()`; hardcoded `theme="dark"`
-- **Dark mode:** Always dark; no `next-themes`
+- **Toasts:** Sonner (`sonner`) — `toast()` / `toast.success()` / `toast.error()`; hardcoded `theme="light"`
+- **Dark mode:** Always light; no `next-themes`
 - **Utilities:** `cn()` from `@/lib/utils` (clsx + tailwind-merge)
 
 ---
@@ -21,7 +21,7 @@ A dark-first, warm-toned visual system inspired by editorial planners and calm p
 
 A focused task board, not a generic dashboard.
 
-- Dark ink backgrounds (`#210124`) with Light Gold accents with Fern and Dark Slate Grey supporting tones (palette: Lime Cream, Light Gold, Fern, Dark Slate Grey, Midnight Violet).
+- Pale mint backgrounds (`#f4fcf8`) with red/orange accents on a pale mint canvas (palette "Autumn Breeze": apricot #f7c471, red #e0433a, orange #fa7f46, peach #fdce86, mint #d4f8ea).
 - Translucent card surfaces with visible borders.
 - Handwriting display headings (Caveat) for personality.
 - Subtle linear gradients and radial gradients on hero sections.
@@ -35,23 +35,23 @@ All semantic tokens are defined in `app/globals.css` via `@theme inline` and map
 
 | Token | Class | Hex | Usage |
 |-------|-------|-----|-------|
-| `background` | `bg-background` | `#210124` | Page canvas |
-| `foreground` | `text-foreground` | `#f4fdaf` | Primary text |
-| `card` | `bg-card` | `#2e1032` | Card backgrounds |
-| `primary` | `bg-primary` / `text-primary` | `#efdd8d` | Primary actions, accents |
-| `primary-foreground` | `text-primary-foreground` | `#210124` | Text on primary bg |
-| `secondary` | `bg-secondary` | `#394f49` | Secondary surfaces |
-| `secondary-foreground` | `text-secondary-foreground` | `#f4fdaf` | Text on secondary bg |
-| `muted` | `bg-muted` | `#65743a` | Badges, pills |
-| `muted-foreground` | `text-muted-foreground` | `#cdd79c` | Supporting copy |
-| `accent` | `bg-accent` | `#3a1c3f` | Alternate surfaces |
-| `accent-foreground` | `text-accent-foreground` | `#f4fdaf` | Bright highlight text |
-| `border` | `border-border` | `#4a2c4f` | Panel borders |
-| `input` | `border-input` | `#5a3a60` | Input field border |
-| `ring` | `ring-ring` | `#efdd8d` | Focus rings |
-| `destructive` | `bg-destructive` | `#ff9a86` | Delete/error actions |
+| `background` | `bg-background` | `#f4fcf8` | Page canvas |
+| `foreground` | `text-foreground` | `#3b1512` | Primary text |
+| `card` | `bg-card` | `#fffdf9` | Card backgrounds |
+| `primary` | `bg-primary` / `text-primary` | `#e0433a` | Primary actions, accents |
+| `primary-foreground` | `text-primary-foreground` | `#f4fcf8` | Text on primary bg |
+| `secondary` | `bg-secondary` | `#fdce86` | Secondary surfaces |
+| `secondary-foreground` | `text-secondary-foreground` | `#3b1512` | Text on secondary bg |
+| `muted` | `bg-muted` | `#f7c471` | Badges, pills |
+| `muted-foreground` | `text-muted-foreground` | `#8a5a3c` | Supporting copy |
+| `accent` | `bg-accent` | `#ffe9c7` | Alternate surfaces |
+| `accent-foreground` | `text-accent-foreground` | `#3b1512` | Bright highlight text |
+| `border` | `border-border` | `#f0d2a8` | Panel borders |
+| `input` | `border-input` | `#e6c08c` | Input field border |
+| `ring` | `ring-ring` | `#e0433a` | Focus rings |
+| `destructive` | `bg-destructive` | `#c2261e` | Delete/error actions |
 
-Input background is not a semantic token — apply via `className="bg-[var(--color-input-bg)]"` (`#26092a`).
+Input background is not a semantic token — apply via `className="bg-[var(--color-input-bg)]"` (`#ffffff`).
 
 Complex gradients (radial/custom blends) remain as inline values in their respective components.
 

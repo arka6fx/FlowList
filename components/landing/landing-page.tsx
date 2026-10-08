@@ -63,7 +63,7 @@ export function LandingPage() {
                     initial={{ opacity: 0, y: -12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="sticky top-3 z-40 mb-8 rounded-full border border-border bg-[linear-gradient(135deg,rgba(57,79,73,0.75),rgba(33,1,36,0.8))] px-4 py-3 shadow-lg backdrop-blur-xl sm:px-5"
+                    className="sticky top-3 z-40 mb-8 rounded-full border border-border bg-[linear-gradient(135deg,rgba(253,206,134,0.7),rgba(212,248,234,0.8))] px-4 py-3 shadow-lg backdrop-blur-xl sm:px-5"
                 >
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <p className={cn(caveat.className, "text-2xl font-semibold text-accent-foreground")}>FlowList</p>
@@ -91,7 +91,7 @@ export function LandingPage() {
                 </motion.header>
 
                 {/* Hero */}
-                <section id="overview" className="mb-6 overflow-hidden rounded-3xl border border-border bg-[radial-gradient(circle_at_top_left,#394f49_0%,#2e1032_55%,#210124_100%)] p-6 shadow-xl sm:p-8 lg:p-10">
+                <section id="overview" className="mb-6 overflow-hidden rounded-3xl border border-border bg-[radial-gradient(circle_at_top_left,#fdce86_0%,#fff3df_55%,#f4fcf8_100%)] p-6 shadow-xl sm:p-8 lg:p-10">
                     <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
                         <motion.div
                             variants={stagger}
@@ -250,7 +250,7 @@ export function LandingPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true, margin: "-60px" }}
                     transition={{ duration: 0.5 }}
-                    className="mb-8 overflow-hidden rounded-3xl border border-border bg-[linear-gradient(130deg,#394f49,#2e1032)] p-6 text-center sm:p-8"
+                    className="mb-8 overflow-hidden rounded-3xl border border-border bg-[linear-gradient(130deg,#fdce86,#d4f8ea)] p-6 text-center sm:p-8"
                 >
                     <h2 className="text-2xl font-semibold text-accent-foreground">Ready to plan your next focused day?</h2>
                     <p className={cn(caveat.className, "mt-2 text-2xl text-muted-foreground sm:text-3xl")}>

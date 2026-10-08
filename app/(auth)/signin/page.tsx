@@ -57,7 +57,7 @@ export default function SignIn() {
                 transition={{ duration: 0.45, ease: "easeOut" }}
                 className="relative w-full max-w-sm"
             >
-                <Card className="shadow-[0_24px_50px_rgba(0,0,0,0.55)]">
+                <Card className="shadow-[0_24px_50px_rgba(150,70,20,0.25)]">
                     <CardHeader className="gap-1">
                         <p className={cn(
                             caveat.className,
