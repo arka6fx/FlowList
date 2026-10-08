@@ -149,7 +149,7 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
                     initial={{ opacity: 0, y: -16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="mb-6 rounded-2xl border border-border bg-[radial-gradient(circle_at_top_left,#522531_0%,#291f28_55%,#1f1d22_100%)] p-5"
+                    className="mb-6 rounded-3xl border border-border/80 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] bg-[radial-gradient(circle_at_top_left,#394f49_0%,#2e1032_55%,#210124_100%)] p-5"
                 >
                     <div className="flex items-center justify-between gap-4">
                         <div>
@@ -201,17 +201,15 @@ export default function TodoBoard({ initialTodos, username }: TodoBoardProps) {
                                             className="h-9 bg-[var(--color-input-bg)]"
                                         />
                                     </div>
-                                    <motion.div whileTap={{ scale: 0.97 }}>
-                                        <Button
-                                            type="submit"
-                                            disabled={isSaving}
-                                            size="lg"
-                                            className="w-full sm:w-auto"
-                                        >
-                                            <PlusIcon data-icon="inline-start" />
-                                            {isSaving ? "Adding…" : "Add task"}
-                                        </Button>
-                                    </motion.div>
+                                    <Button
+                                        type="submit"
+                                        disabled={isSaving}
+                                        size="lg"
+                                        className="w-full sm:w-auto"
+                                    >
+                                        <PlusIcon data-icon="inline-start" />
+                                        {isSaving ? "Adding…" : "Add task"}
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>
@@ -330,8 +328,9 @@ function TodoRow({ todo, index, onToggle, onDelete, onSave }: TodoRowProps) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, x: -12, transition: { duration: 0.18 } }}
-            transition={{ duration: 0.25, delay: index * 0.04, ease: "easeOut" }}
-            className="rounded-xl border border-border bg-secondary/80 p-3"
+            transition={{ type: "spring", stiffness: 420, damping: 32, delay: index * 0.03 }}
+            whileHover={{ y: -2 }}
+            className="rounded-2xl border border-border-muted/60 bg-secondary/70 p-3 backdrop-blur-sm transition-shadow hover:shadow-[0_10px_28px_-12px_rgba(0,0,0,0.7)]"
         >
             <div className="flex items-start gap-3">
                 <div className="mt-0.5 shrink-0">
@@ -396,17 +395,15 @@ function TodoRow({ todo, index, onToggle, onDelete, onSave }: TodoRowProps) {
                         </DialogContent>
                     </Dialog>
 
-                    <motion.div whileTap={{ scale: 0.9 }}>
-                        <Button
-                            variant="ghost"
-                            size="icon-xs"
-                            onClick={() => void onDelete(todo.id)}
-                            className="text-destructive hover:bg-destructive/10 hover:text-destructive"
-                        >
-                            <Trash2Icon />
-                            <span className="sr-only">Delete task</span>
-                        </Button>
-                    </motion.div>
+                    <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => void onDelete(todo.id)}
+                        className="text-destructive hover:bg-destructive/15 hover:text-destructive"
+                    >
+                        <Trash2Icon />
+                        <span className="sr-only">Delete task</span>
+                    </Button>
                 </div>
             </div>
         </motion.li>

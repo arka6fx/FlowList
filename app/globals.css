@@ -5,33 +5,33 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --color-background: #211f24;
-    --color-foreground: #f8f1f2;
-    --color-card: #2b232a;
-    --color-card-secondary: #3d2b33;
-    --color-card-alt: #382a32;
-    --color-primary: #c14f63;
-    --color-primary-end: #98384b;
-    --color-muted: #6c3240;
-    --color-muted-fg: #ddb5bc;
-    --color-muted-light: #d8a9b2;
-    --color-border: #713743;
-    --color-border-light: #8d4451;
-    --color-border-muted: #6d3440;
-    --color-input: #75404c;
-    --color-input-bg: #3a2a32;
-    --color-ring: #cd5f74;
-    --color-destructive: #d66b7e;
-    --color-accent: #ffe4e8;
-    --color-placeholder: #c6949d;
-    --color-todo-row: #9f4657;
-    --color-todo-row-border: #8a4251;
-    --color-todo-edit: #7f3746;
-    --color-todo-edit-border: #d18493;
-    --color-todo-empty: #4a333c;
-    --color-todo-checked: #5c2733;
-    --color-glow-warm: #7b3a49;
-    --color-glow-deep: #5b2a36;
+    --color-background: #210124;
+    --color-foreground: #f4fdaf;
+    --color-card: #2e1032;
+    --color-card-secondary: #394f49;
+    --color-card-alt: #3a1c3f;
+    --color-primary: #efdd8d;
+    --color-primary-end: #d8c46c;
+    --color-muted: #65743a;
+    --color-muted-fg: #cdd79c;
+    --color-muted-light: #b9c487;
+    --color-border: #4a2c4f;
+    --color-border-light: #66416c;
+    --color-border-muted: #3f5a52;
+    --color-input: #5a3a60;
+    --color-input-bg: #26092a;
+    --color-ring: #efdd8d;
+    --color-destructive: #ff9a86;
+    --color-accent: #3a1c3f;
+    --color-placeholder: #8f9a6b;
+    --color-todo-row: #394f49;
+    --color-todo-row-border: #4a635b;
+    --color-todo-edit: #65743a;
+    --color-todo-edit-border: #efdd8d;
+    --color-todo-empty: #3a1c3f;
+    --color-todo-checked: #65743a;
+    --color-glow-warm: #65743a;
+    --color-glow-deep: #394f49;
     --font-heading: var(--font-sans);
     --font-sans: var(--font-sans);
     --color-sidebar-ring: var(--sidebar-ring);
@@ -70,33 +70,35 @@ body {
 
 
 :root {
-    --background: #211f24;
-    --foreground: #f8f1f2;
-    --card: #2b232a;
-    --card-foreground: #f8f1f2;
-    --popover: #2b232a;
-    --popover-foreground: #f8f1f2;
-    --primary: #c14f63;
-    --primary-foreground: #fff0f2;
-    --secondary: #3d2b33;
-    --secondary-foreground: #ffe4e8;
-    --muted: #6c3240;
-    --muted-foreground: #ddb5bc;
-    --accent: #382a32;
-    --accent-foreground: #ffe4e8;
-    --destructive: #d66b7e;
-    --border: #713743;
-    --input: #75404c;
-    --ring: #cd5f74;
+    --background: #210124;
+    --foreground: #f4fdaf;
+    --card: #2e1032;
+    --card-foreground: #f4fdaf;
+    --popover: #2e1032;
+    --popover-foreground: #f4fdaf;
+    --primary: #efdd8d;
+    --primary-foreground: #210124;
+    --secondary: #394f49;
+    --secondary-foreground: #f4fdaf;
+    --muted: #65743a;
+    --muted-foreground: #cdd79c;
+    --accent: #3a1c3f;
+    --accent-foreground: #f4fdaf;
+    --destructive: #ff9a86;
+    --border: #4a2c4f;
+    --input: #5a3a60;
+    --ring: #efdd8d;
     --radius: 0.75rem;
-    --sidebar: #2b232a;
-    --sidebar-foreground: #f8f1f2;
-    --sidebar-primary: #c14f63;
-    --sidebar-primary-foreground: #fff0f2;
-    --sidebar-accent: #382a32;
-    --sidebar-accent-foreground: #ffe4e8;
-    --sidebar-border: #713743;
-    --sidebar-ring: #cd5f74;
+    --sidebar: #2e1032;
+    --sidebar-foreground: #f4fdaf;
+    --sidebar-primary: #efdd8d;
+    --sidebar-primary-foreground: #210124;
+    --sidebar-accent: #3a1c3f;
+    --sidebar-accent-foreground: #f4fdaf;
+    --sidebar-border: #4a2c4f;
+    --sidebar-ring: #efdd8d;
+    --ease-apple: cubic-bezier(0.32, 0.72, 0, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @layer base {
@@ -105,7 +107,22 @@ body {
     }
   body {
     @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(60rem 40rem at 10% -10%, rgba(101, 116, 58, 0.28), transparent 60%),
+      radial-gradient(50rem 36rem at 100% 0%, rgba(57, 79, 73, 0.35), transparent 60%),
+      radial-gradient(45rem 30rem at 50% 110%, rgba(239, 221, 141, 0.10), transparent 60%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
     }
+  ::selection {
+    background: rgba(239, 221, 141, 0.35);
+    }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
   html {
     @apply font-sans;
     }
