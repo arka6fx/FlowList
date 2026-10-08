@@ -21,11 +21,11 @@ A dark-first, warm-toned visual system inspired by editorial planners and calm p
 
 A focused task board, not a generic dashboard.
 
-- Dark ink backgrounds (`#211f24`) with warm rose/magenta accents.
+- Dark ink backgrounds (`#210124`) with Light Gold accents with Fern and Dark Slate Grey supporting tones (palette: Lime Cream, Light Gold, Fern, Dark Slate Grey, Midnight Violet).
 - Translucent card surfaces with visible borders.
 - Handwriting display headings (Caveat) for personality.
 - Subtle linear gradients and radial gradients on hero sections.
-- Purposeful motion — entrance animations, smooth list reordering, press feedback.
+- Purposeful motion — entrance animations, smooth list reordering, Apple-style press feedback (pill buttons, hover lift, spring easing).
 
 ---
 
@@ -35,23 +35,23 @@ All semantic tokens are defined in `app/globals.css` via `@theme inline` and map
 
 | Token | Class | Hex | Usage |
 |-------|-------|-----|-------|
-| `background` | `bg-background` | `#211f24` | Page canvas |
-| `foreground` | `text-foreground` | `#f8f1f2` | Primary text |
-| `card` | `bg-card` | `#2b232a` | Card backgrounds |
-| `primary` | `bg-primary` / `text-primary` | `#c14f63` | Primary actions, accents |
-| `primary-foreground` | `text-primary-foreground` | `#fff5f7` | Text on primary bg |
-| `secondary` | `bg-secondary` | `#3d2b33` | Secondary surfaces |
-| `secondary-foreground` | `text-secondary-foreground` | `#f5dde2` | Text on secondary bg |
-| `muted` | `bg-muted` | `#6c3240` | Badges, pills |
-| `muted-foreground` | `text-muted-foreground` | `#ddb5bc` | Supporting copy |
-| `accent` | `bg-accent` | `#382a32` | Alternate surfaces |
-| `accent-foreground` | `text-accent-foreground` | `#ffe4e8` | Bright highlight text |
-| `border` | `border-border` | `#713743` | Panel borders |
-| `input` | `border-input` | `#75404c` | Input field border |
-| `ring` | `ring-ring` | `#cd5f74` | Focus rings |
-| `destructive` | `bg-destructive` | `#d66b7e` | Delete/error actions |
+| `background` | `bg-background` | `#210124` | Page canvas |
+| `foreground` | `text-foreground` | `#f4fdaf` | Primary text |
+| `card` | `bg-card` | `#2e1032` | Card backgrounds |
+| `primary` | `bg-primary` / `text-primary` | `#efdd8d` | Primary actions, accents |
+| `primary-foreground` | `text-primary-foreground` | `#210124` | Text on primary bg |
+| `secondary` | `bg-secondary` | `#394f49` | Secondary surfaces |
+| `secondary-foreground` | `text-secondary-foreground` | `#f4fdaf` | Text on secondary bg |
+| `muted` | `bg-muted` | `#65743a` | Badges, pills |
+| `muted-foreground` | `text-muted-foreground` | `#cdd79c` | Supporting copy |
+| `accent` | `bg-accent` | `#3a1c3f` | Alternate surfaces |
+| `accent-foreground` | `text-accent-foreground` | `#f4fdaf` | Bright highlight text |
+| `border` | `border-border` | `#4a2c4f` | Panel borders |
+| `input` | `border-input` | `#5a3a60` | Input field border |
+| `ring` | `ring-ring` | `#efdd8d` | Focus rings |
+| `destructive` | `bg-destructive` | `#ff9a86` | Delete/error actions |
 
-Input background is not a semantic token — apply via `className="bg-[var(--color-input-bg)]"` (`#3a2a32`).
+Input background is not a semantic token — apply via `className="bg-[var(--color-input-bg)]"` (`#26092a`).
 
 Complex gradients (radial/custom blends) remain as inline values in their respective components.
 
@@ -183,7 +183,7 @@ const ease = [0.25, 0.46, 0.45, 0.94] as const;
 
 ## Interaction
 
-- Press feedback: `whileTap={{ scale: 0.97 }}` on primary CTA buttons
+- Buttons are pill-shaped (Apple style): hover lifts 1px, press scales to 0.96 via CSS (`--ease-apple`); do not wrap in `motion.div whileTap`
 - Focus: shadcn default ring (`ring-ring`)
 - Disabled: `disabled:cursor-not-allowed disabled:opacity-60`
 - Loading: button label changes during async operations (e.g. "Saving…")
